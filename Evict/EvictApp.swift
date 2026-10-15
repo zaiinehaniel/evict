@@ -46,6 +46,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 let busy = entry.busyReason.map { "\($0)" } ?? entry.backgroundCPU.map { String(format: "-  (cpu %.1f%%)", $0 * 100) } ?? "-"
                 print("\(entry.app.name.padding(toLength: 24, withPad: " ", startingAt: 0)) \(memory.padding(toLength: 9, withPad: " ", startingAt: 0)) idle \(Format.duration(entry.idle).padding(toLength: 8, withPad: " ", startingAt: 0)) busy: \(busy)\(entry.isActive ? "  [active]" : "")\(entry.isProtected ? "  [protected]" : "")")
             }
+            print("\nIn the background:")
+            for group in monitor.background {
+                print("  \(group.name.padding(toLength: 30, withPad: " ", startingAt: 0)) \(Format.memory(group.memory).padding(toLength: 9, withPad: " ", startingAt: 0)) \(group.processCount) processes  \(group.bundlePath ?? "")")
+            }
             NSApp.terminate(nil)
         }
     }

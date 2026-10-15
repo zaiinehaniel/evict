@@ -26,6 +26,8 @@ It informs; you decide. No scary warnings, no "optimization scores".
   playing audio, on a call, keeping the Mac awake (downloads, exports, video) or
   busy working. Apps always quit gracefully, like pressing ⌘Q, so they can ask to
   save your work.
+- **Shows what hides in the background.** Memory held outside the Dock — menu bar
+  apps, helpers and agents like Docker's VM — grouped by app, for reference.
 - **Easy to undo.** Recently evicted apps are one click away from coming back.
 - **Kind to your battery.** On battery or in Low Power Mode, apps count as idle
   after half the time, and apps burning CPU in the background are called out.

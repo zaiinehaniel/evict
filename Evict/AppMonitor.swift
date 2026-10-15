@@ -17,6 +17,8 @@ final class AppMonitor {
     private(set) var activePID: pid_t?
     private(set) var memory: [pid_t: UInt64] = [:]
     private(set) var busy: [pid_t: BusyReason] = [:]
+    /// Memory held outside the Dock (menu bar apps, helpers, agents), largest first.
+    private(set) var background: [BackgroundGroup] = []
     private(set) var system = SystemMemory.current()
     private(set) var power = PowerState.current()
     private(set) var now = Date()
@@ -58,7 +60,7 @@ final class AppMonitor {
     /// A frozen monitor with sample data, for README screenshots. Observes nothing.
     init(settings: AppSettings, demoApps: [(app: RunningAppInfo, memory: UInt64, idle: TimeInterval)],
          activePID: pid_t?, busy: [pid_t: BusyReason], backgroundCPU: [pid_t: Double],
-         recentlyEvicted: [EvictedApp], system: SystemMemory) {
+         recentlyEvicted: [EvictedApp], background: [BackgroundGroup], system: SystemMemory) {
         let now = Date()
         self.settings = settings
         self.now = now
@@ -67,6 +69,7 @@ final class AppMonitor {
         self.busy = busy
         self.cpuShare = backgroundCPU
         self.recentlyEvicted = recentlyEvicted
+        self.background = background
         self.system = system
         for demo in demoApps {
             memory[demo.app.id] = demo.memory
@@ -150,6 +153,7 @@ final class AppMonitor {
         memory = usage.mapValues(\.footprint)
         updateCPUShare(usage.mapValues(\.cpuTime), at: snapshot.uptime)
         busy = BusyDetector.reasons(for: appPIDs, snapshot: snapshot, cpuShare: cpuShare)
+        background = BackgroundProcesses.groups(in: snapshot, excluding: appPIDs, ownBundlePath: Bundle.main.bundlePath)
     }
 
     private func updateCPUShare(_ cpuTime: [pid_t: UInt64], at uptime: UInt64) {

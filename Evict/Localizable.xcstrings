@@ -171,6 +171,16 @@
         }
       }
     },
+    "Collapsed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recolhido"
+          }
+        }
+      }
+    },
     "Default (%@)": {
       "localizations": {
         "pt-BR": {
@@ -287,6 +297,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fecha em %@"
+          }
+        }
+      }
+    },
+    "Expanded": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expandido"
           }
         }
       }
@@ -421,6 +441,26 @@
         }
       }
     },
+    "In the background": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em segundo plano"
+          }
+        }
+      }
+    },
+    "In the background, %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em segundo plano, %@"
+          }
+        }
+      }
+    },
     "Just used": {
       "localizations": {
         "pt-BR": {
@@ -477,6 +517,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Memória"
+          }
+        }
+      }
+    },
+    "Menu bar apps, helpers and agents. Shown for reference: Evict never closes them.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps da barra de menus, auxiliares e agentes. Só para referência: o Evict nunca fecha esses processos."
           }
         }
       }

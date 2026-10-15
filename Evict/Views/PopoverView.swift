@@ -19,6 +19,10 @@ struct PopoverView: View {
             header(evictable: evictable, reclaimable: reclaimable)
             Divider()
             list(entries)
+            if !monitor.background.isEmpty {
+                Divider()
+                BackgroundSection(groups: monitor.background)
+            }
             if !monitor.recentlyEvicted.isEmpty {
                 Divider()
                 RecentlyEvictedSection(items: Array(monitor.recentlyEvicted.prefix(3)), now: monitor.now, reopen: monitor.reopen)

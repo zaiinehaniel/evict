@@ -1,0 +1,906 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ ago": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "há %@"
+          }
+        }
+      }
+    },
+    "%@ of %@ GB": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de %@ GB"
+          }
+        }
+      }
+    },
+    "%@ of %@ gigabytes used": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de %@ gigabytes em uso"
+          }
+        }
+      }
+    },
+    "%@ of %@ gigabytes used, under pressure": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de %@ gigabytes em uso, sob pressão"
+          }
+        }
+      }
+    },
+    "%lld idle apps holding %@": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld idle app holding %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld idle apps holding %@"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld app ocioso ocupando %@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld apps ociosos ocupando %@"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld%% CPU": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% CPU"
+          }
+        }
+      }
+    },
+    "%lld%% of memory used": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% da memória em uso"
+          }
+        }
+      }
+    },
+    "About": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre"
+          }
+        }
+      }
+    },
+    "Active": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ativo"
+          }
+        }
+      }
+    },
+    "Add": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar"
+          }
+        }
+      }
+    },
+    "Add App": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar app"
+          }
+        }
+      }
+    },
+    "Be stricter on battery": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ser mais rigoroso na bateria"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "Choose App…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher app…"
+          }
+        }
+      }
+    },
+    "Default (%@)": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Padrão (%@)"
+          }
+        }
+      }
+    },
+    "Default idle time": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo ocioso padrão"
+          }
+        }
+      }
+    },
+    "Default idle time: %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo ocioso padrão: %@"
+          }
+        }
+      }
+    },
+    "Evict idle apps": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar apps ociosos"
+          }
+        }
+      }
+    },
+    "Evict idle apps automatically": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar apps ociosos automaticamente"
+          }
+        }
+      }
+    },
+    "Evict never closes the app you're using, or apps playing audio, in a call, keeping the Mac awake or busy working. Apps always quit gracefully, like pressing ⌘Q.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Evict nunca fecha o app que você está usando, nem apps tocando áudio, em chamada, mantendo o Mac acordado ou trabalhando. Os apps sempre fecham com cuidado, como ao pressionar ⌘Q."
+          }
+        }
+      }
+    },
+    "Evict never connects to the internet and collects no data.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Evict nunca se conecta à internet e não coleta nenhum dado."
+          }
+        }
+      }
+    },
+    "Evict the apps that overstayed.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Libere a memória dos apps esquecidos."
+          }
+        }
+      }
+    },
+    "Evicting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechamento"
+          }
+        }
+      }
+    },
+    "Evicting %@ in 1 min": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechando %@ em 1 min"
+          }
+        }
+      }
+    },
+    "Evicting %@ in 1 min — %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechando %@ em 1 min — %@"
+          }
+        }
+      }
+    },
+    "Evicts in %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fecha em %@"
+          }
+        }
+      }
+    },
+    "Force Quit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forçar encerramento"
+          }
+        }
+      }
+    },
+    "Force Quit…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forçar encerramento…"
+          }
+        }
+      }
+    },
+    "Free and open source under the MIT License.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratuito e de código aberto, sob a Licença MIT."
+          }
+        }
+      }
+    },
+    "Freed %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liberou %@"
+          }
+        }
+      }
+    },
+    "frees ~%@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "libera ~%@"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geral"
+          }
+        }
+      }
+    },
+    "Give an app its own idle time, or choose Never to protect it. Other apps use the default (%@).": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dê a um app seu próprio tempo ocioso, ou escolha Nunca para protegê-lo. Os outros apps usam o padrão (%@)."
+          }
+        }
+      }
+    },
+    "Idle %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocioso há %@"
+          }
+        }
+      }
+    },
+    "Idle for %@. Choose Keep Open to leave it running.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocioso há %@. Escolha Manter aberto para deixá-lo rodando."
+          }
+        }
+      }
+    },
+    "Idle time": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo ocioso"
+          }
+        }
+      }
+    },
+    "Idle time for %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo ocioso de %@"
+          }
+        }
+      }
+    },
+    "in %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "em %@"
+          }
+        }
+      }
+    },
+    "In a call": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em chamada"
+          }
+        }
+      }
+    },
+    "Just used": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usado agora"
+          }
+        }
+      }
+    },
+    "Keep Open": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manter aberto"
+          }
+        }
+      }
+    },
+    "Keeping Mac awake": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantendo o Mac acordado"
+          }
+        }
+      }
+    },
+    "Keeping screen on": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantendo a tela ligada"
+          }
+        }
+      }
+    },
+    "Launch at login": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir ao iniciar sessão"
+          }
+        }
+      }
+    },
+    "Memory": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memória"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
+          }
+        }
+      }
+    },
+    "Never": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nunca"
+          }
+        }
+      }
+    },
+    "No app is past its idle time yet": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum app passou do tempo ocioso ainda"
+          }
+        }
+      }
+    },
+    "No apps open": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum app aberto"
+          }
+        }
+      }
+    },
+    "No rules yet": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma regra ainda"
+          }
+        }
+      }
+    },
+    "Nothing overstaying.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum app passou da hora."
+          }
+        }
+      }
+    },
+    "Notify before evicting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisar antes de fechar"
+          }
+        }
+      }
+    },
+    "On battery or in Low Power Mode, apps count as idle after half the usual time.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na bateria ou no Modo de Pouca Energia, os apps contam como ociosos na metade do tempo."
+          }
+        }
+      }
+    },
+    "On battery: apps count as idle after half the usual time": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na bateria: os apps contam como ociosos na metade do tempo"
+          }
+        }
+      }
+    },
+    "Only when memory is low": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Só com pouca memória"
+          }
+        }
+      }
+    },
+    "Open Apps": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps abertos"
+          }
+        }
+      }
+    },
+    "Playing audio": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tocando áudio"
+          }
+        }
+      }
+    },
+    "Protect": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proteger"
+          }
+        }
+      }
+    },
+    "Protected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protegido"
+          }
+        }
+      }
+    },
+    "Quit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
+          }
+        }
+      }
+    },
+    "Quit %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar %@"
+          }
+        }
+      }
+    },
+    "Quit %lld idle apps?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Quit %lld idle app?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Quit %lld idle apps?"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fechar %lld app ocioso?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fechar %lld apps ociosos?"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Quit All": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar todos"
+          }
+        }
+      }
+    },
+    "Quit apps past their idle time": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fecha os apps que passaram do tempo ocioso"
+          }
+        }
+      }
+    },
+    "Quit Evict": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encerrar o Evict"
+          }
+        }
+      }
+    },
+    "Recently evicted": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechados recentemente"
+          }
+        }
+      }
+    },
+    "Remove Rule": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover regra"
+          }
+        }
+      }
+    },
+    "Reopen": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reabrir"
+          }
+        }
+      }
+    },
+    "Reopen %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reabrir %@"
+          }
+        }
+      }
+    },
+    "Rules": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regras"
+          }
+        }
+      }
+    },
+    "Set Idle Time": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Definir tempo ocioso"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
+          }
+        }
+      }
+    },
+    "Show in Finder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar no Finder"
+          }
+        }
+      }
+    },
+    "Show memory usage in menu bar": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar uso de memória na barra de menus"
+          }
+        }
+      }
+    },
+    "Sort apps": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordenar apps"
+          }
+        }
+      }
+    },
+    "Sort by": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordenar por"
+          }
+        }
+      }
+    },
+    "Under pressure": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sob pressão"
+          }
+        }
+      }
+    },
+    "Unprotect": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desproteger"
+          }
+        }
+      }
+    },
+    "Used %@ ago": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usado há %@"
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versão %@"
+          }
+        }
+      }
+    },
+    "View on GitHub": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver no GitHub"
+          }
+        }
+      }
+    },
+    "Working": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trabalhando"
+          }
+        }
+      }
+    },
+    "Worth closing": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vale fechar"
+          }
+        }
+      }
+    },
+    "Your Mac has room to breathe.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu Mac tem espaço para respirar."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

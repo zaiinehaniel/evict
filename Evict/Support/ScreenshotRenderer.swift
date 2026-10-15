@@ -87,7 +87,7 @@ enum ScreenshotRenderer {
             app(1, "Google Chrome", "com.google.Chrome", 3.4, idleMinutes: 0),
             app(2, "Xcode", "com.apple.dt.Xcode", 2.6, idleMinutes: 370),
             app(3, "Visual Studio Code", "com.microsoft.VSCode", 1.9, idleMinutes: 302),
-            app(4, "Docker", "com.docker.docker", 1.2, idleMinutes: 275),
+            app(4, "Notes", "com.apple.Notes", 0.32, idleMinutes: 190),
             app(5, "Postman", "com.postmanlabs.mac", 0.62, idleMinutes: 252),
             app(6, "Spotify", "com.spotify.client", 0.41, idleMinutes: 420),
             app(7, "Safari", "com.apple.Safari", 0.86, idleMinutes: 52),
@@ -104,10 +104,16 @@ enum ScreenshotRenderer {
             demoApps: apps,
             activePID: 1,
             busy: [6: .playingAudio],
-            backgroundCPU: [4: 0.06],
+            backgroundCPU: [3: 0.06],
             recentlyEvicted: [
                 EvictedApp(name: "Photos", bundlePath: NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Photos")?.path,
                            freed: UInt64(1.3 * gb), date: Date().addingTimeInterval(-14 * 60), automatic: true),
+            ],
+            background: [
+                BackgroundGroup(id: "docker", name: "Docker",
+                                bundlePath: NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.docker.docker")?.path,
+                                memory: UInt64(2.4 * gb), processCount: 11),
+                BackgroundGroup(id: "node", name: "node", bundlePath: nil, memory: UInt64(0.38 * gb), processCount: 2),
             ],
             system: SystemMemory(used: UInt64(11.2 * gb), total: UInt64(16 * gb), pressure: .normal)
         )

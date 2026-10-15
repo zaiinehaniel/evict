@@ -39,6 +39,14 @@ It informs; you decide. No scary warnings, no "optimization scores".
 
 ## Install
 
+With [Homebrew](https://brew.sh):
+
+```sh
+brew install --cask zaiinehaniel/tap/evict
+```
+
+Or by hand:
+
 1. Download `Evict.zip` from the latest [release](../../releases/latest).
 2. Unzip it and move `Evict.app` to `/Applications`.
 3. Open it. Evict isn't notarized by Apple (it's a free project without a paid
@@ -69,8 +77,8 @@ open build/Build/Products/Release/Evict.app
 
 ### Releasing
 
-Push a version tag and GitHub Actions builds `Evict.zip` and attaches it to a new
-release:
+Push a version tag and GitHub Actions builds `Evict.zip`, attaches it to a new
+release and updates the [Homebrew cask](https://github.com/zaiinehaniel/homebrew-tap):
 
 ```sh
 git tag v0.1.0 && git push origin v0.1.0

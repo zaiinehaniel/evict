@@ -81,13 +81,13 @@ struct PopoverView: View {
             }
             .pickerStyle(.inline)
         } label: {
-            Image(systemName: "arrow.up.arrow.down")
+            Label("Sort apps", systemImage: "arrow.up.arrow.down")
+                .labelStyle(.iconOnly)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
         .help("Sort apps")
-        .accessibilityLabel("Sort apps")
         .accessibilityValue(Text(sortOrder.title))
     }
 
@@ -149,23 +149,18 @@ struct PopoverView: View {
 
                 Spacer()
 
-                Button(action: openSettings) {
-                    Image(systemName: "gearshape")
-                }
-                .buttonStyle(.borderless)
-                .foregroundStyle(.secondary)
-                .keyboardShortcut(",")
-                .help("Settings")
-                .accessibilityLabel("Settings")
+                HStack(spacing: 10) {
+                    Button("Settings", systemImage: "gearshape", action: openSettings)
+                        .keyboardShortcut(",")
+                        .help("Settings")
 
-                Button { NSApp.terminate(nil) } label: {
-                    Image(systemName: "power")
+                    Button("Quit Evict", systemImage: "power") { NSApp.terminate(nil) }
+                        .keyboardShortcut("q")
+                        .help("Quit Evict")
                 }
+                .labelStyle(.iconOnly)
                 .buttonStyle(.borderless)
                 .foregroundStyle(.secondary)
-                .keyboardShortcut("q")
-                .help("Quit Evict")
-                .accessibilityLabel("Quit Evict")
             }
         }
         .frame(height: 28)

@@ -72,14 +72,21 @@ final class AppSettings {
         if isProtected { protectedApps.insert(key) } else { protectedApps.remove(key) }
     }
 
-    func rule(for app: RunningAppInfo) -> IdleRule {
-        guard let key = app.key else { return .automatic }
-        return Self.alwaysProtected.contains(key) ? .never : rule(forKey: key)
-    }
+    func rule(for app: RunningAppInfo) -> IdleRule { self[ruleForApp: app.key] }
 
-    func setRule(_ rule: IdleRule, for app: RunningAppInfo) {
-        guard let key = app.key else { return }
-        setRule(rule, forKey: key)
+    func setRule(_ rule: IdleRule, for app: RunningAppInfo) { self[ruleForApp: app.key] = rule }
+
+    /// A running app's rule by its key, bindable as `$settings[ruleForApp: app.key]`.
+    /// Apps without a key always use the default; built-in protections read as "Never".
+    subscript(ruleForApp key: String?) -> IdleRule {
+        get {
+            guard let key else { return .automatic }
+            return Self.alwaysProtected.contains(key) ? .never : rule(forKey: key)
+        }
+        set {
+            guard let key else { return }
+            setRule(newValue, forKey: key)
+        }
     }
 
     // MARK: - Rules by app key
@@ -92,6 +99,12 @@ final class AppSettings {
     func rule(forKey key: String) -> IdleRule {
         if protectedApps.contains(key) { return .never }
         return idleRules[key].map(IdleRule.minutes) ?? .automatic
+    }
+
+    /// Bindable form of `rule(forKey:)`: `$settings[ruleForKey: key]`.
+    subscript(ruleForKey key: String) -> IdleRule {
+        get { rule(forKey: key) }
+        set { setRule(newValue, forKey: key) }
     }
 
     func removeRule(forKey key: String) {

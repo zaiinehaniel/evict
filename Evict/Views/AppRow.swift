@@ -104,20 +104,19 @@ struct AppRow: View {
 
     private var quickActions: some View {
         HStack(spacing: 0) {
-            Button { monitor.toggleProtection(entry) } label: {
-                Image(systemName: entry.isProtected ? "lock.fill" : "lock.open")
-                    .frame(width: 24, height: 24)
-                    .contentShape(Rectangle())
+            Button(protectTitle, systemImage: entry.isProtected ? "lock.fill" : "lock.open") {
+                monitor.toggleProtection(entry)
             }
+            .frame(width: 24, height: 24)
+            .contentShape(Rectangle())
             .help(protectTitle)
 
-            Button { ask(.quit(entry.id)) } label: {
-                Image(systemName: "xmark.circle")
-                    .frame(width: 24, height: 24)
-                    .contentShape(Rectangle())
-            }
-            .help("Quit \(entry.app.name)")
+            Button("Quit \(entry.app.name)", systemImage: "xmark.circle") { ask(.quit(entry.id)) }
+                .frame(width: 24, height: 24)
+                .contentShape(Rectangle())
+                .help("Quit \(entry.app.name)")
         }
+        .labelStyle(.iconOnly)
         .buttonStyle(.borderless)
         .foregroundStyle(.secondary)
     }
@@ -146,7 +145,7 @@ struct AppRow: View {
         Button("Force Quit…") { ask(.forceQuit(entry.id)) }
         Divider()
         Button(protectTitle) { monitor.toggleProtection(entry) }
-        Picker("Set Idle Time", selection: idleRule) {
+        Picker("Set Idle Time", selection: Bindable(monitor.settings)[ruleForApp: entry.app.key]) {
             Text("Default (\(Format.longDuration(minutes: monitor.settings.defaultIdleMinutes)))").tag(IdleRule.automatic)
             ForEach(IdleRule.presets, id: \.self) { minutes in
                 Text(Format.longDuration(minutes: minutes)).tag(IdleRule.minutes(minutes))
@@ -157,13 +156,6 @@ struct AppRow: View {
         Divider()
         Button("Show in Finder") { monitor.showInFinder(entry) }
             .disabled(entry.app.bundleURL == nil)
-    }
-
-    private var idleRule: Binding<IdleRule> {
-        Binding(
-            get: { monitor.settings.rule(for: entry.app) },
-            set: { monitor.settings.setRule($0, for: entry.app) }
-        )
     }
 
     private var accessibilityValue: String {

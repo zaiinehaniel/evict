@@ -29,7 +29,7 @@ struct RulesSettingsView: View {
             VStack(spacing: 0) {
                 List(selection: $selection) {
                     ForEach(apps) { app in
-                        RuleRow(app: app, rule: rule(for: app.key))
+                        RuleRow(app: app, rule: $settings[ruleForKey: app.key])
                     }
                     .onDelete { offsets in
                         offsets.map { apps[$0].key }.forEach(settings.removeRule(forKey:))
@@ -47,12 +47,11 @@ struct RulesSettingsView: View {
                 HStack(spacing: 0) {
                     addMenu
                     Divider().frame(height: 16)
-                    Button(action: removeSelected) {
-                        Image(systemName: "minus").frame(width: 24, height: 20)
-                    }
-                    .disabled(selection.isEmpty)
-                    .help("Remove Rule")
-                    .accessibilityLabel("Remove Rule")
+                    Button("Remove Rule", systemImage: "minus", action: removeSelected)
+                        .labelStyle(.iconOnly)
+                        .frame(width: 24, height: 20)
+                        .disabled(selection.isEmpty)
+                        .help("Remove Rule")
                     Spacer()
                 }
                 .buttonStyle(.borderless)
@@ -79,20 +78,14 @@ struct RulesSettingsView: View {
             }
             Button("Choose App…", action: chooseApp)
         } label: {
-            Image(systemName: "plus").frame(width: 24, height: 20)
+            Label("Add App", systemImage: "plus")
+                .labelStyle(.iconOnly)
+                .frame(width: 24, height: 20)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
         .help("Add App")
-        .accessibilityLabel("Add App")
-    }
-
-    private func rule(for key: String) -> Binding<IdleRule> {
-        Binding(
-            get: { settings.rule(forKey: key) },
-            set: { settings.setRule($0, forKey: key) }
-        )
     }
 
     /// New rules start as "Never": protecting an app is the most common reason to add one.

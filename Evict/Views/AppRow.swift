@@ -11,6 +11,7 @@ struct AppRow: View {
 
     private var memoryText: String { entry.memory.map(Format.memory) ?? "—" }
     private var statusText: String {
+        if entry.isQuitting { return String(localized: "Quitting…") }
         let base = entry.isActive ? String(localized: "Active") : Format.idleLabel(entry.idle, pastLimit: entry.isIdle)
         if let busy = entry.busyReason { return "\(base) · \(busy.label)" }
         if let cpu = entry.notableBackgroundCPU {
@@ -56,6 +57,14 @@ struct AppRow: View {
             if let confirmation {
                 confirmButtons(confirmation)
                     .transition(.opacity)
+            } else if entry.isQuitting {
+                ProgressView()
+                    .controlSize(.small)
+                    .transition(.opacity)
+                Text(memoryText)
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                    .frame(minWidth: 60, alignment: .trailing)
             } else {
                 if isHovered {
                     quickActions
@@ -77,6 +86,8 @@ struct AppRow: View {
                     .frame(minWidth: 60, alignment: .trailing)
             }
         }
+        .opacity(entry.isQuitting ? 0.6 : 1)
+        .animation(animation, value: entry.isQuitting)
         .padding(.horizontal, 14)
         .frame(height: Self.height)
         .background {

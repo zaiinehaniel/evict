@@ -21,7 +21,7 @@ struct PopoverView: View {
             list(entries)
             if !monitor.background.isEmpty {
                 Divider()
-                BackgroundSection(groups: monitor.background)
+                BackgroundSection(groups: monitor.background, monitor: monitor)
             }
             if !monitor.recentlyEvicted.isEmpty {
                 Divider()

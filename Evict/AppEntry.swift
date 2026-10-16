@@ -14,6 +14,8 @@ struct AppEntry: Identifiable {
     let isProtected: Bool
     /// Doing something that must not be interrupted, even if it looks idle.
     let busyReason: BusyReason?
+    /// Asked to quit and still shutting down.
+    let isQuitting: Bool
     /// Time until automatic eviction, when it's on and applies to this app.
     let evictsIn: TimeInterval?
     /// CPU it keeps using while idle, as a share of one core — what it costs in battery.
@@ -22,7 +24,7 @@ struct AppEntry: Identifiable {
     var id: pid_t { app.id }
     /// Past its idle limit (never true for the active app).
     var isIdle: Bool { !isActive && idle >= idleLimit }
-    var isEvictable: Bool { isIdle && !isProtected && busyReason == nil }
+    var isEvictable: Bool { isIdle && !isProtected && busyReason == nil && !isQuitting }
 
     /// Idle CPU worth mentioning (busy apps are already labeled as working).
     var notableBackgroundCPU: Double? {
@@ -65,7 +67,7 @@ enum SortOrder: String, CaseIterable, Identifiable {
 
     /// Lots of memory held for a long time ranks first; apps Evict won't close sink.
     private static func closeScore(_ entry: AppEntry) -> Double {
-        if entry.isActive || entry.isProtected || entry.busyReason != nil { return -1 }
+        if entry.isActive || entry.isProtected || entry.busyReason != nil || entry.isQuitting { return -1 }
         // Apps burning CPU in the background are worth more to close.
         let energy = 1 + 5 * (entry.notableBackgroundCPU ?? 0)
         return Double(entry.memory ?? 0) * max(entry.idle, 60) * energy

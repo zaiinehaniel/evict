@@ -3,7 +3,7 @@ import Foundation
 
 /// Memory held outside the Dock: menu bar apps, helpers and agents (Docker's VM,
 /// Creative Cloud, sync clients…), grouped by the app they come from.
-/// Read-only — Evict never closes them.
+/// Only menu bar apps can be quit from here; helpers and agents are for reference.
 struct BackgroundGroup: Identifiable, Sendable {
     /// The app bundle path, or the executable name for processes outside any app.
     let id: String
@@ -11,6 +11,8 @@ struct BackgroundGroup: Identifiable, Sendable {
     let bundlePath: String?
     let memory: UInt64
     let processCount: Int
+    /// Menu bar apps that quitting this group asks to quit (empty: not quittable).
+    var appPIDs: [pid_t] = []
 }
 
 enum BackgroundProcesses {
@@ -23,8 +25,10 @@ enum BackgroundProcesses {
     ]
 
     /// Background groups, largest first. `apps` are the Dock apps (already listed);
-    /// `ownBundlePath` excludes Evict itself.
-    static func groups(in snapshot: ProcessSnapshot, excluding apps: Set<pid_t>, ownBundlePath: String) -> [BackgroundGroup] {
+    /// `ownBundlePath` excludes Evict itself. `menuBarApps` maps a bundle path to
+    /// the menu bar apps that quit it.
+    static func groups(in snapshot: ProcessSnapshot, excluding apps: Set<pid_t>, ownBundlePath: String,
+                       menuBarApps: [String: [pid_t]]) -> [BackgroundGroup] {
         var totals: [String: (name: String, bundlePath: String?, memory: UInt64, count: Int)] = [:]
 
         for (pid, process) in snapshot.processes where snapshot.owner(of: pid, among: apps) == nil {
@@ -49,7 +53,8 @@ enum BackgroundProcesses {
 
         return totals
             .map { BackgroundGroup(id: $0.key, name: $0.value.name, bundlePath: $0.value.bundlePath,
-                                   memory: $0.value.memory, processCount: $0.value.count) }
+                                   memory: $0.value.memory, processCount: $0.value.count,
+                                   appPIDs: $0.value.bundlePath.flatMap { menuBarApps[$0] } ?? []) }
             .filter { $0.memory >= minimumMemory }
             .sorted { $0.memory > $1.memory }
     }
@@ -72,7 +77,7 @@ enum BackgroundProcesses {
 
     /// "/Applications/Docker.app/Contents/MacOS/com.docker.backend" → "/Applications/Docker.app".
     /// Nested helpers resolve to the outer app, not "… Helper.app".
-    private static func outermostBundle(in path: String) -> String? {
+    static func outermostBundle(in path: String) -> String? {
         guard let range = path.range(of: ".app/") else { return path.hasSuffix(".app") ? path : nil }
         return String(path[..<range.lowerBound]) + ".app"
     }

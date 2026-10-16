@@ -39,12 +39,19 @@ final class AppMonitor {
     private var cpuShare: [pid_t: Double] = [:]
     /// Quits Evict asked for, logged as evicted once the app actually terminates.
     @ObservationIgnored private var quitRequests: [pid_t: EvictedApp] = [:]
+    /// Apps asked to quit and still shutting down, and when they were asked.
+    private(set) var quitting: [pid_t: Date] = [:]
+    /// Background groups asked to quit, by group ID, and when they were asked.
+    private(set) var quittingBackground: [String: Date] = [:]
 
     /// Never listed: Evict itself is excluded by PID; Finder is always running.
     private static let excludedBundleIDs: Set<String> = ["com.apple.finder"]
     private static let sampleInterval: Duration = .seconds(3)
     /// CPU use is averaged over at least this long, so short spikes don't count as busy.
     private static let cpuWindow: UInt64 = 20_000_000_000
+    /// An app still running this long after a quit request probably declined it
+    /// (e.g. the user cancelled a save dialog), so it stops showing as quitting.
+    private static let quitTimeout: TimeInterval = 15
 
     init(settings: AppSettings) {
         self.settings = settings
@@ -96,10 +103,12 @@ final class AppMonitor {
             let idle = isActive ? 0 : max(0, now.timeIntervalSince(lastUsed[app.id] ?? startedAt))
             let limit = settings.idleLimit(for: app) * limitScale
             let isProtected = settings.isProtected(app)
-            let busyReason = busy[app.id]
+            // Apps burn CPU while shutting down; that isn't "working".
+            let isQuitting = quitting[app.id].map { now.timeIntervalSince($0) < Self.quitTimeout } ?? false
+            let busyReason = isQuitting ? nil : busy[app.id]
 
             var evictsIn: TimeInterval?
-            if autoEvicting, !isActive, !isProtected, busyReason == nil {
+            if autoEvicting, !isActive, !isProtected, !isQuitting, busyReason == nil {
                 evictsIn = pendingEvictions[app.id].map { max($0.timeIntervalSince(now), 0) } ?? max(limit - idle, 0)
             }
 
@@ -111,6 +120,7 @@ final class AppMonitor {
                 isActive: isActive,
                 isProtected: isProtected,
                 busyReason: busyReason,
+                isQuitting: isQuitting,
                 evictsIn: evictsIn,
                 backgroundCPU: cpuShare[app.id]
             )
@@ -153,7 +163,23 @@ final class AppMonitor {
         memory = usage.mapValues(\.footprint)
         updateCPUShare(usage.mapValues(\.cpuTime), at: snapshot.uptime)
         busy = BusyDetector.reasons(for: appPIDs, snapshot: snapshot, cpuShare: cpuShare)
-        background = BackgroundProcesses.groups(in: snapshot, excluding: appPIDs, ownBundlePath: Bundle.main.bundlePath)
+        background = BackgroundProcesses.groups(in: snapshot, excluding: appPIDs, ownBundlePath: Bundle.main.bundlePath,
+                                                 menuBarApps: Self.menuBarApps())
+        let groups = Set(background.map(\.id))
+        quittingBackground = quittingBackground.filter { groups.contains($0.key) && now.timeIntervalSince($0.value) < Self.quitTimeout }
+    }
+
+    /// Running menu bar apps by the bundle they belong to. The outer app alone
+    /// quits the whole bundle (Docker.app takes its VM and UI down with it);
+    /// nested ones are only listed when the outer app isn't running.
+    private static func menuBarApps() -> [String: [pid_t]] {
+        var outer: [String: pid_t] = [:]
+        var nested: [String: [pid_t]] = [:]
+        for app in NSWorkspace.shared.runningApplications where app.activationPolicy == .accessory && !app.isTerminated {
+            guard let path = app.bundleURL?.path, let bundle = BackgroundProcesses.outermostBundle(in: path) else { continue }
+            if path == bundle { outer[bundle] = app.processIdentifier } else { nested[bundle, default: []].append(app.processIdentifier) }
+        }
+        return nested.merging(outer.mapValues { [$0] }) { _, outer in outer }
     }
 
     private func updateCPUShare(_ cpuTime: [pid_t: UInt64], at uptime: UInt64) {
@@ -178,7 +204,21 @@ final class AppMonitor {
     func requestQuit(_ entry: AppEntry, force: Bool = false, automatic: Bool = false) {
         guard let app = NSRunningApplication(processIdentifier: entry.id) else { return }
         quitRequests[entry.id] = EvictedApp(entry, automatic: automatic)
-        if force { app.forceTerminate() } else { app.terminate() }
+        guard force ? app.forceTerminate() : app.terminate() else { return }
+        now = Date()
+        quitting[entry.id] = now
+    }
+
+    /// Asks a background group's menu bar apps to quit, like ⌘Q.
+    func requestQuit(_ group: BackgroundGroup) {
+        let asked = group.appPIDs.filter { NSRunningApplication(processIdentifier: $0)?.terminate() == true }
+        guard !asked.isEmpty else { return }
+        now = Date()
+        quittingBackground[group.id] = now
+    }
+
+    func isQuitting(_ group: BackgroundGroup) -> Bool {
+        quittingBackground[group.id].map { now.timeIntervalSince($0) < Self.quitTimeout } ?? false
     }
 
     func reopen(_ evicted: EvictedApp) {
@@ -244,6 +284,7 @@ final class AppMonitor {
 
         let running = Set(apps.map(\.id))
         lastUsed = lastUsed.filter { running.contains($0.key) }
+        quitting = quitting.filter { running.contains($0.key) }
         recentlyEvicted = EvictedApp.pruned(recentlyEvicted)
 
         // Apps we haven't seen yet: restore from a previous Evict session if the

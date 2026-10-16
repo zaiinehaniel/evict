@@ -521,12 +521,12 @@
         }
       }
     },
-    "Menu bar apps, helpers and agents. Shown for reference: Evict never closes them.": {
+    "Menu bar apps, helpers and agents. Menu bar apps can be quit; helpers and agents are shown for reference.": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apps da barra de menus, auxiliares e agentes. Só para referência: o Evict nunca fecha esses processos."
+            "value": "Apps da barra de menus, auxiliares e agentes. Apps da barra de menus podem ser fechados; auxiliares e agentes são só para referência."
           }
         }
       }
@@ -747,6 +747,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fecha os apps que passaram do tempo ocioso"
+          }
+        }
+      }
+    },
+    "Quitting…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechando…"
           }
         }
       }

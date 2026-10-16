@@ -4,6 +4,8 @@ import AppKit
 enum PendingConfirmation: Equatable {
     case quit(pid_t)
     case forceQuit(pid_t)
+    /// A menu bar app in "In the background", by group ID.
+    case quitBackground(String)
     case evictIdle
 }
 
@@ -17,6 +19,11 @@ extension AppMonitor {
     func forceQuit(_ entry: AppEntry) {
         pendingConfirmation = nil
         requestQuit(entry, force: true)
+    }
+
+    func quit(_ group: BackgroundGroup) {
+        pendingConfirmation = nil
+        requestQuit(group)
     }
 
     /// Quits every app past its idle limit that isn't protected, busy or in front.

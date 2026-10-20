@@ -1315,6 +1315,23 @@
         }
       }
     },
+    "row.moveToTrash": {
+      "comment": "Overview row button that moves a category's items to the Trash. Short on purpose; the drill-in footer uses \"Move %lld to Trash\".",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move to Trash"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pra Lixeira"
+          }
+        }
+      }
+    },
     "Rules": {
       "localizations": {
         "pt-BR": {

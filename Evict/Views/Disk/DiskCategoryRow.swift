@@ -60,7 +60,8 @@ struct DiskCategoryRow: View {
     private func title(for action: Action) -> LocalizedStringKey {
         switch action {
         case .clean(let opens): opens ? "Open and clean" : "Clean"
-        case .remove(let permanently): id.removalTitle(permanently: permanently)
+        // A shorter pt-BR copy, so the overview row's button leaves room for the name.
+        case .remove(let permanently): id.removal == .trash && !permanently ? "row.moveToTrash" : id.removalTitle(permanently: permanently)
         }
     }
 

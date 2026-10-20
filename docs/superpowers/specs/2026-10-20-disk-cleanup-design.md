@@ -114,7 +114,7 @@ The thresholds are my calls and are easy to tweak.
 | iOS Simulators | unavailable simulator devices (`xcrun simctl list devices unavailable -j`, removed per device with `simctl delete <udid>`). Runtimes live in `/Library` and are out of scope | per device |
 | Package manager caches | Homebrew (`brew --cache`), npm (`~/.npm/_cacache`), pip, yarn, pnpm, CocoaPods, Gradle, SwiftPM — only those that exist | per tool |
 | App caches | `~/Library/Caches/*` (per folder, shown with the app's name and icon when the folder name resolves to a bundle ID). `com.apple.*` folders are not listed | per app |
-| Docker | dangling images and build cache, sized from `docker system df --format json`, removed with `docker image prune -f` / `docker builder prune -f`. Only shown if the CLI is found and the daemon answers; any CLI failure hides the category | 2 items: images, build cache |
+| Docker | unused images and build cache. Works whenever Docker Desktop is installed, running or not (see "Docker" below) | 2 items: images, build cache |
 
 **Your files** (Trash by default, ⌥ permanent)
 
@@ -131,6 +131,33 @@ An item appears in only one category. Precedence follows the table order
 (Installers > Xcode archives > Old downloads > Large files > Stale
 `node_modules`), and an item inside an already-listed folder isn't listed
 again.
+
+### Docker
+
+Images live inside Docker Desktop's VM disk
+(`~/Library/Containers/com.docker.docker/Data/vms/0/data/Docker.raw`), and
+only the Docker daemon can remove them. The user wants Evict to clean them
+even when Docker is merely installed, and approved Evict starting and
+stopping Docker for that.
+
+- **Running:** sizes come from `docker system df --format json`. Cleaning
+  runs `docker image prune -a -f --filter until=720h` (unused images older
+  than 30 days, my call on "old") and `docker builder prune -f`.
+- **Installed but not running:** the row shows the VM disk's allocated size,
+  "Docker · 38 GB (not running)". That size isn't counted in "can be
+  reclaimed", since the reclaimable share is unknown. The action is
+  **"Open and clean"**: start Docker hidden (`open -g -a Docker`), wait for
+  `docker info` to answer (time out after about 2 minutes with an inline
+  error), prune as above, then quit Docker gracefully **only if Evict started
+  it**. The row shows progress ("Starting Docker…", "Cleaning…").
+- The drill-in shows the two items once Docker is running; while it's off,
+  the row has no drill-in.
+- Docker is never part of "Clear app junk", because starting an app isn't a
+  side effect a bulk delete should have.
+- The freed space is returned to macOS as the VM disk shrinks, which may not
+  happen instantly. The row says what was cleaned, not a promised GB.
+- Not installed (no `Docker.app` and no CLI): the category is hidden. If the
+  CLI fails for any other reason, it shows an inline error on the row.
 
 ### Never scanned (the user asked: nothing from Drive, iCloud, or the OS)
 

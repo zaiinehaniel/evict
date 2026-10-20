@@ -94,6 +94,11 @@ final class DiskMonitor {
         categories[id]
     }
 
+    /// What "Clear app junk" would remove: the one-click selection of every App junk category but Docker.
+    var clearableAppJunk: UInt64 {
+        Self.bulkAppJunk.reduce(0) { $0 + selection(in: $1).reduce(0) { $0 + $1.size } }
+    }
+
     /// What one click can reclaim: all of the group's categories, or every one for `nil`.
     func reclaimable(_ group: DiskGroup?) -> UInt64 {
         DiskCategoryID.allCases
@@ -125,9 +130,11 @@ final class DiskMonitor {
     /// Removes the one-click selection of every App junk category. Docker has its own clean.
     func clearAppJunk() async {
         pendingConfirmation = nil
-        let ids = DiskCategoryID.allCases.filter { $0.group == .appJunk && $0 != .docker }
-        await remove(Dictionary(uniqueKeysWithValues: ids.map { ($0, selection(in: $0)) }), permanently: false)
+        await remove(Dictionary(uniqueKeysWithValues: Self.bulkAppJunk.map { ($0, selection(in: $0)) }), permanently: false)
     }
+
+    /// The categories "Clear app junk" covers. Docker has its own clean, since it may have to start Docker.
+    private static let bulkAppJunk = DiskCategoryID.allCases.filter { $0.group == .appJunk && $0 != .docker }
 
     #if DEBUG
     /// `scan()`, awaited — for `--dump-disk`.
@@ -138,6 +145,8 @@ final class DiskMonitor {
     #endif
 
     private func runScan() async {
+        // Cancelled before it got to run: `cancelScan()` has already cleared `isScanning`, keep it that way.
+        guard !Task.isCancelled else { return }
         isScanning = true
         failures = [:]
         removedDuringScan = []

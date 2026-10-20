@@ -14,7 +14,6 @@ struct EvictApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItemController: StatusItemController?
     private var autoEvictor: AutoEvictor?
-    /// Passed to `StatusItemController` once the Disk tab exists.
     let diskMonitor = DiskMonitor()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -34,7 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         #endif
         let monitor = AppMonitor(settings: AppSettings())
-        statusItemController = StatusItemController(monitor: monitor)
+        statusItemController = StatusItemController(monitor: monitor, diskMonitor: diskMonitor)
         autoEvictor = AutoEvictor(monitor: monitor)
     }
 

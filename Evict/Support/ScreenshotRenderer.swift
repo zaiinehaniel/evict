@@ -15,8 +15,10 @@ enum ScreenshotRenderer {
     static func render(to directory: URL) {
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         for (name, appearance) in [("popover-light", NSAppearance.Name.aqua), ("popover-dark", .darkAqua)] {
-            let view = PopoverView(monitor: demoMonitor())
+            let view = PopoverView(monitor: demoMonitor(), diskMonitor: DiskMonitor())
                 .background(Color(nsColor: .windowBackgroundColor))
+                // Not the user's defaults, so the Memory tab is drawn whichever tab they last used.
+                .defaultAppStorage(screenshotDefaults)
                 .environment(\.controlActiveState, .key)
             let hosting = NSHostingView(rootView: view)
             hosting.appearance = NSAppearance(named: appearance)
@@ -73,6 +75,9 @@ enum ScreenshotRenderer {
             window.orderOut(nil)
         }
     }
+
+    /// Never written to: the views only read their defaults here.
+    private static let screenshotDefaults = UserDefaults(suiteName: "com.hanielcortes.evict.screenshots") ?? .standard
 
     private final class KeyWindow: NSWindow {
         override var canBecomeKey: Bool { true }

@@ -68,14 +68,14 @@ struct DiskOverview: View {
         return ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 if !appJunk.isEmpty {
-                    groupLabel("App junk")
+                    groupLabel("App junk", showsDeleteHint: false)
                     ForEach(appJunk) { id in
                         DiskCategoryRow(id: id, diskMonitor: diskMonitor) { open(id) }
                             .transition(.opacity)
                     }
                 }
                 if showsYourFiles {
-                    groupLabel("Your files")
+                    groupLabel("Your files", showsDeleteHint: yourFiles.contains { $0.removal == .trash })
                     if !diskMonitor.userFilesEnabled {
                         DiskPromptRow(systemImage: "folder.badge.questionmark",
                                       title: "Check your files",
@@ -103,14 +103,31 @@ struct DiskOverview: View {
         .frame(height: min(height, Self.maxHeight))
     }
 
-    private func groupLabel(_ title: LocalizedStringKey) -> some View {
-        Text(title)
-            .font(.caption.weight(.medium))
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 14)
-            .padding(.bottom, 4)
-            .frame(maxWidth: .infinity, minHeight: Self.labelHeight, maxHeight: Self.labelHeight, alignment: .bottomLeading)
-            .accessibilityAddTraits(.isHeader)
+    private func groupLabel(_ title: LocalizedStringKey, showsDeleteHint: Bool) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+                .accessibilityAddTraits(.isHeader)
+            Spacer(minLength: 8)
+            if showsDeleteHint {
+                OptionDeleteHint()
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.bottom, 4)
+        .frame(maxWidth: .infinity, minHeight: Self.labelHeight, maxHeight: Self.labelHeight, alignment: .bottom)
+    }
+}
+
+/// "⌥ deletes permanently" — teaches that holding Option turns Move to Trash into Delete.
+struct OptionDeleteHint: View {
+    var body: some View {
+        Text("⌥ deletes permanently")
+            .font(.caption)
+            .foregroundStyle(.tertiary)
+            .lineLimit(1)
+            .accessibilityLabel("Hold Option to delete permanently")
     }
 }
 

@@ -17,6 +17,7 @@ final class DiskMonitor {
     private(set) var userFilesEnabled = Preferences.diskUserFilesEnabled
     /// The protected folders macOS refused access to on the last scan.
     private(set) var deniedFolders: [ProtectedFolder] = []
+    private(set) var docker: DockerState = .notInstalled
 
     @ObservationIgnored private var scanTask: Task<Void, Never>?
 
@@ -37,6 +38,32 @@ final class DiskMonitor {
         Preferences.diskUserFilesEnabled = true
         userFilesEnabled = true
         scan()
+    }
+
+    /// Prunes Docker's unused images and build cache, starting Docker first if it's stopped
+    /// and quitting it again only if this call started it.
+    func cleanDocker() async {
+        var startedByUs = false
+        do {
+            if case .stopped = docker {
+                docker = .working(.starting)
+                try await Docker.start()
+                startedByUs = true
+            }
+            docker = .working(.cleaning)
+            try await Docker.prune()
+            if startedByUs {
+                docker = .working(.stopping)
+                await Docker.quit()
+            }
+            categories[.docker] = nil
+            Preferences.diskScanCache = DiskCategoryID.allCases.compactMap { categories[$0] }
+            docker = .cleaned
+        } catch {
+            // It may have come up before the failure; leave it as it was found.
+            if startedByUs { await Docker.quit() }
+            docker = .failed(error.localizedDescription)
+        }
     }
 
     func cancelScan() {
@@ -73,11 +100,15 @@ final class DiskMonitor {
         isScanning = true
         volume = DiskVolume.current()
         let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
-        // Docker arrives with the Docker scanner.
         let ids = DiskCategoryID.allCases.filter { $0.group == .appJunk && $0 != .docker }
         let enabled = userFilesEnabled
         if !enabled { clearUserFiles() }
+        var scanDocker = true
+        if case .working = docker { scanDocker = false }
         await withTaskGroup(of: Void.self) { group in
+            if scanDocker {
+                group.addTask { await self.scanDocker() }
+            }
             for id in ids {
                 group.addTask {
                     let items = await AppJunkScanner.scan(id, runningBundleIDs: running)
@@ -107,6 +138,25 @@ final class DiskMonitor {
         }
         guard !Task.isCancelled else { return }
         isScanning = false
+    }
+
+    private func scanDocker() async {
+        guard Docker.app != nil || Docker.cli != nil else {
+            docker = .notInstalled
+            store([], in: .docker)
+            return
+        }
+        if await Docker.isRunning() {
+            let items = (try? await Docker.usage()) ?? []
+            guard !Task.isCancelled else { return }
+            docker = .running
+            store(items, in: .docker)
+        } else {
+            let size = FileSizes.allocatedSize(of: Docker.vmDisk)
+            guard !Task.isCancelled else { return }
+            docker = .stopped(vmSize: size)
+            store([], in: .docker)
+        }
     }
 
     private func setDenied(_ folders: [ProtectedFolder]) {

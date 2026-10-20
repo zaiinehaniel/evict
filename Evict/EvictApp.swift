@@ -70,6 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 print("Disk: \(Format.memory(volume.available)) free of \(Format.memory(volume.total))\(volume.isLow ? "  [low]" : "")")
             }
             print("Your files: \(diskMonitor.userFilesEnabled ? "on" : "off")")
+            print("Docker: \(diskMonitor.docker)")
             if !diskMonitor.deniedFolders.isEmpty {
                 print("denied: \(diskMonitor.deniedFolders.map(\.rawValue).joined(separator: ", "))")
             }

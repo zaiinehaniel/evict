@@ -11,12 +11,52 @@
         }
       }
     },
+    "%@ can be cleared": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ pra limpar"
+          }
+        }
+      }
+    },
     "%@ of %@ GB": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ de %@ GB"
+          }
+        }
+      }
+    },
+    "%@ of %@ GB free": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de %@ GB livres"
+          }
+        }
+      }
+    },
+    "%@ of %@ gigabytes free": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de %@ gigabytes livres"
+          }
+        }
+      }
+    },
+    "%@ of %@ gigabytes free, low on space": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de %@ gigabytes livres, pouco espaço"
           }
         }
       }
@@ -37,6 +77,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ de %@ gigabytes em uso, sob pressão"
+          }
+        }
+      }
+    },
+    "%@ · %lld open": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %lld abertos"
           }
         }
       }
@@ -101,6 +151,50 @@
         }
       }
     },
+    "^[%lld items](inflect: true)": {
+      "localizations": {
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld item"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld itens"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "^[%lld items](inflect: true) couldn't be removed": {
+      "localizations": {
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld item não pôde ser removido"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld itens não puderam ser removidos"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "About": {
       "localizations": {
         "pt-BR": {
@@ -141,12 +235,72 @@
         }
       }
     },
+    "Age": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idade"
+          }
+        }
+      }
+    },
+    "Allow access to %@ in System Settings": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir acesso à pasta %@ nos Ajustes do Sistema"
+          }
+        }
+      }
+    },
+    "App caches": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caches de programas"
+          }
+        }
+      }
+    },
+    "App junk": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lixo de programas"
+          }
+        }
+      }
+    },
+    "Back to Disk": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voltar pra Disco"
+          }
+        }
+      }
+    },
     "Be stricter on battery": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Ser mais rigoroso na bateria"
+          }
+        }
+      }
+    },
+    "Build cache": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache de build"
           }
         }
       }
@@ -161,12 +315,62 @@
         }
       }
     },
+    "Check your files": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificar seus arquivos"
+          }
+        }
+      }
+    },
     "Choose App…": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Escolher app…"
+          }
+        }
+      }
+    },
+    "Clean": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar"
+          }
+        }
+      }
+    },
+    "Cleaned": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpo"
+          }
+        }
+      }
+    },
+    "Cleaning…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpando…"
+          }
+        }
+      }
+    },
+    "Clear app junk": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar lixo de programas"
           }
         }
       }
@@ -207,6 +411,146 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tempo ocioso padrão: %@"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar"
+          }
+        }
+      }
+    },
+    "Delete %@ of app junk?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar %@ de lixo de programas?"
+          }
+        }
+      }
+    },
+    "Delete %lld · %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar %lld · %@"
+          }
+        }
+      }
+    },
+    "Delete Xcode data, simulators, package caches and app caches. Docker and your files aren't touched.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apaga dados do Xcode, simuladores e caches de pacotes e de programas. O Docker e seus arquivos não são tocados."
+          }
+        }
+      }
+    },
+    "Desktop": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesa"
+          }
+        }
+      }
+    },
+    "Disk": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disco"
+          }
+        }
+      }
+    },
+    "Docker": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker"
+          }
+        }
+      }
+    },
+    "Docker didn't start in time": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Docker não iniciou a tempo"
+          }
+        }
+      }
+    },
+    "Docker is open but not responding": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Docker está aberto, mas não responde"
+          }
+        }
+      }
+    },
+    "Docker isn't running, and Docker Desktop isn't installed to start it": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Docker não está rodando e o Docker Desktop não está instalado pra iniciá-lo"
+          }
+        }
+      }
+    },
+    "Documents": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Documentos"
+          }
+        }
+      }
+    },
+    "Downloads": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads"
+          }
+        }
+      }
+    },
+    "Downloads, Desktop and Documents — macOS will ask for access": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads, Mesa e Documentos — o macOS vai pedir acesso"
+          }
+        }
+      }
+    },
+    "Empty": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esvaziar"
           }
         }
       }
@@ -381,6 +725,16 @@
         }
       }
     },
+    "Hold Option to delete permanently": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segure Option pra apagar de vez"
+          }
+        }
+      }
+    },
     "Idle %@": {
       "localizations": {
         "pt-BR": {
@@ -417,6 +771,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tempo ocioso de %@"
+          }
+        }
+      }
+    },
+    "Images": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imagens"
           }
         }
       }
@@ -461,6 +825,26 @@
         }
       }
     },
+    "Installers": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instaladores"
+          }
+        }
+      }
+    },
+    "iOS Simulators": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simuladores de iOS"
+          }
+        }
+      }
+    },
     "Just used": {
       "localizations": {
         "pt-BR": {
@@ -501,6 +885,16 @@
         }
       }
     },
+    "Large files": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arquivos grandes"
+          }
+        }
+      }
+    },
     "Launch at login": {
       "localizations": {
         "pt-BR": {
@@ -527,6 +921,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apps da barra de menus, auxiliares e agentes. Apps da barra de menus podem ser fechados; auxiliares e agentes são só para referência."
+          }
+        }
+      }
+    },
+    "Move %lld to Trash · %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover %lld pra Lixeira · %@"
+          }
+        }
+      }
+    },
+    "Move to Trash": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover pra Lixeira"
           }
         }
       }
@@ -561,6 +975,16 @@
         }
       }
     },
+    "No app junk to clear": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum lixo de programas pra limpar"
+          }
+        }
+      }
+    },
     "No apps open": {
       "localizations": {
         "pt-BR": {
@@ -581,6 +1005,16 @@
         }
       }
     },
+    "not running": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "não está rodando"
+          }
+        }
+      }
+    },
     "Nothing overstaying.": {
       "localizations": {
         "pt-BR": {
@@ -591,12 +1025,32 @@
         }
       }
     },
+    "Nothing to clear.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada pra limpar."
+          }
+        }
+      }
+    },
     "Notify before evicting": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Avisar antes de fechar"
+          }
+        }
+      }
+    },
+    "Old downloads": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baixados antigos"
           }
         }
       }
@@ -631,12 +1085,42 @@
         }
       }
     },
+    "Open": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aberto"
+          }
+        }
+      }
+    },
+    "Open and clean": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir e limpar"
+          }
+        }
+      }
+    },
     "Open Apps": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Apps abertos"
+          }
+        }
+      }
+    },
+    "Package caches": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caches de pacotes"
           }
         }
       }
@@ -667,6 +1151,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Protegido"
+          }
+        }
+      }
+    },
+    "Quick Look": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização rápida"
           }
         }
       }
@@ -751,16 +1245,6 @@
         }
       }
     },
-    "Quitting…": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fechando…"
-          }
-        }
-      }
-    },
     "Quit Evict": {
       "localizations": {
         "pt-BR": {
@@ -771,12 +1255,32 @@
         }
       }
     },
+    "Quitting…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechando…"
+          }
+        }
+      }
+    },
     "Recently evicted": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Fechados recentemente"
+          }
+        }
+      }
+    },
+    "Remove Docker's unused images and build cache": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove as imagens e o cache de build não usados do Docker"
           }
         }
       }
@@ -821,6 +1325,26 @@
         }
       }
     },
+    "Scanning…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analisando…"
+          }
+        }
+      }
+    },
+    "Select all (%lld)": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecionar tudo (%lld)"
+          }
+        }
+      }
+    },
     "Set Idle Time": {
       "localizations": {
         "pt-BR": {
@@ -851,12 +1375,32 @@
         }
       }
     },
+    "Show items": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar itens"
+          }
+        }
+      }
+    },
     "Show memory usage in menu bar": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Mostrar uso de memória na barra de menus"
+          }
+        }
+      }
+    },
+    "Size": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamanho"
           }
         }
       }
@@ -877,6 +1421,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ordenar por"
+          }
+        }
+      }
+    },
+    "Sort items": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordenar itens"
+          }
+        }
+      }
+    },
+    "Sort: %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordem: %@"
+          }
+        }
+      }
+    },
+    "Stale node_modules": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "node_modules antigos"
+          }
+        }
+      }
+    },
+    "Starting Docker…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciando o Docker…"
+          }
+        }
+      }
+    },
+    "Stopping Docker…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encerrando o Docker…"
+          }
+        }
+      }
+    },
+    "The command failed (exit status %d)": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O comando falhou (código de saída %d)"
+          }
+        }
+      }
+    },
+    "Trash": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lixeira"
           }
         }
       }
@@ -921,6 +1535,16 @@
         }
       }
     },
+    "View": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização"
+          }
+        }
+      }
+    },
     "View on GitHub": {
       "localizations": {
         "pt-BR": {
@@ -951,12 +1575,82 @@
         }
       }
     },
+    "Xcode archives": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archives do Xcode"
+          }
+        }
+      }
+    },
+    "Xcode build data": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build do Xcode"
+          }
+        }
+      }
+    },
+    "Xcode device support": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suporte a dispositivos do Xcode"
+          }
+        }
+      }
+    },
+    "Your disk has room to breathe.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu disco tem espaço de sobra."
+          }
+        }
+      }
+    },
+    "Your files": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seus arquivos"
+          }
+        }
+      }
+    },
     "Your Mac has room to breathe.": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Seu Mac tem espaço para respirar."
+          }
+        }
+      }
+    },
+    "· %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %@"
+          }
+        }
+      }
+    },
+    "⌥ deletes permanently": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥ apaga de vez"
           }
         }
       }

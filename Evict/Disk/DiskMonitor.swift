@@ -141,6 +141,17 @@ final class DiskMonitor {
     private static let bulkAppJunk = DiskCategoryID.allCases.filter { $0.group == .appJunk && $0 != .docker }
 
     #if DEBUG
+    /// Sample data for the README screenshots. Touches neither the disk nor the saved preferences.
+    init(demoCategories: [(DiskCategoryID, [DiskItem])], dockerVMSize: UInt64, volume: DiskVolume, userFilesEnabled: Bool) {
+        self.volume = volume
+        self.userFilesEnabled = userFilesEnabled
+        self.kept = []
+        self.docker = .stopped(vmSize: dockerVMSize)
+        for (id, items) in demoCategories {
+            categories[id] = DiskCategory(id: id, items: items, total: items.reduce(0) { $0 + $1.size })
+        }
+    }
+
     /// `scan()`, awaited — for `--dump-disk`.
     func scanAndWait() async {
         scan()

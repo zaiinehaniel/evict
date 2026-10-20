@@ -17,7 +17,13 @@ enum CommandLineTool {
         process.standardInput = FileHandle.nullDevice
 
         return try await withTaskCancellationHandler {
+            try Task.checkCancellation()
             try process.run()
+            // Cancelled between the check and the launch: the handler saw no running process.
+            if Task.isCancelled {
+                process.terminate()
+                throw CancellationError()
+            }
             let timer = Task {
                 try await Task.sleep(for: timeout)
                 if process.isRunning { process.terminate() }

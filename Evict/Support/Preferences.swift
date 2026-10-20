@@ -8,6 +8,7 @@ enum Preferences {
         static let lastUsedByProcess = "lastUsedByProcess"
         static let recentlyEvicted = "recentlyEvicted"
         static let diskScanCache = "diskScanCache"
+        static let diskUserFilesEnabled = "diskUserFilesEnabled"
     }
 
     /// Last-used timestamps keyed by "pid@launchTime", so idle time survives
@@ -33,5 +34,11 @@ enum Preferences {
             return (try? JSONDecoder().decode([DiskCategory].self, from: data)) ?? []
         }
         set { defaults.set(try? JSONEncoder().encode(newValue), forKey: Key.diskScanCache) }
+    }
+
+    /// Whether the user opted in to scanning Downloads, Desktop and Documents.
+    static var diskUserFilesEnabled: Bool {
+        get { defaults.bool(forKey: Key.diskUserFilesEnabled) }
+        set { defaults.set(newValue, forKey: Key.diskUserFilesEnabled) }
     }
 }

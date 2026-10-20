@@ -69,6 +69,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if let volume = diskMonitor.volume {
                 print("Disk: \(Format.memory(volume.available)) free of \(Format.memory(volume.total))\(volume.isLow ? "  [low]" : "")")
             }
+            print("Your files: \(diskMonitor.userFilesEnabled ? "on" : "off")")
+            if !diskMonitor.deniedFolders.isEmpty {
+                print("denied: \(diskMonitor.deniedFolders.map(\.rawValue).joined(separator: ", "))")
+            }
             for id in DiskCategoryID.allCases {
                 guard let category = diskMonitor.category(id) else { continue }
                 print("\n\(String(localized: id.title))  \(Format.memory(category.total))")

@@ -13,6 +13,10 @@ final class DiskMonitor {
     /// Only the categories with something in them.
     private(set) var categories: [DiskCategoryID: DiskCategory] = [:]
     private(set) var isScanning = false
+    /// Whether the user opted in to scanning Downloads, Desktop and Documents.
+    private(set) var userFilesEnabled = Preferences.diskUserFilesEnabled
+    /// The protected folders macOS refused access to on the last scan.
+    private(set) var deniedFolders: [ProtectedFolder] = []
 
     @ObservationIgnored private var scanTask: Task<Void, Never>?
 
@@ -25,6 +29,14 @@ final class DiskMonitor {
     func scan() {
         scanTask?.cancel()
         scanTask = Task { await runScan() }
+    }
+
+    /// Records the opt-in and scans. The scan checks each protected folder in order, and the
+    /// first check of each is what makes macOS ask.
+    func enableUserFiles() {
+        Preferences.diskUserFilesEnabled = true
+        userFilesEnabled = true
+        scan()
     }
 
     func cancelScan() {
@@ -61,13 +73,33 @@ final class DiskMonitor {
         isScanning = true
         volume = DiskVolume.current()
         let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
-        // Docker arrives with the Docker scanner, Your files with theirs.
+        // Docker arrives with the Docker scanner.
         let ids = DiskCategoryID.allCases.filter { $0.group == .appJunk && $0 != .docker }
+        // Never touch a protected folder before the opt-in: the walk then treats all three as denied.
+        let enabled = userFilesEnabled
+        let denied = enabled
+            ? await Task.detached { ProtectedFolder.allCases.filter { !$0.hasAccess() } }.value
+            : []
+        if enabled { deniedFolders = denied }
+        let skipped = Set(enabled ? denied : ProtectedFolder.allCases)
         await withTaskGroup(of: Void.self) { group in
             for id in ids {
                 group.addTask {
                     let items = await AppJunkScanner.scan(id, runningBundleIDs: running)
                     await self.store(items, in: id)
+                }
+            }
+            group.addTask {
+                let found = await UserFilesScanner.scan(denied: skipped)
+                guard !Task.isCancelled else { return }
+                for id in DiskCategoryID.allCases where id.group == .yourFiles && id != .trash {
+                    await self.store(found[id] ?? [], in: id)
+                }
+            }
+            if enabled {
+                group.addTask {
+                    let trash = await UserFilesScanner.scanTrash()
+                    await self.store(trash?.items ?? [], in: .trash)
                 }
             }
         }
@@ -77,6 +109,7 @@ final class DiskMonitor {
 
     private func store(_ items: [DiskItem], in id: DiskCategoryID) {
         guard !Task.isCancelled else { return }
+        let items = items.sorted { $0.size > $1.size }
         if items.isEmpty {
             categories[id] = nil
         } else {

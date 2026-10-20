@@ -23,14 +23,16 @@ enum UserFilesScanner {
             at: home, includingPropertiesForKeys: HomeExclusions.resourceKeys, options: [.skipsPackageDescendants]
         ) else { return [:] }
 
+        let keys = Set(HomeExclusions.resourceKeys)
+        let deniedPaths = Set(denied.map { $0.url.standardizedFileURL.path })
         var visited = 0
         for case let url as URL in enumerator {
             visited += 1
             if visited % 500 == 0, Task.isCancelled { return [:] }
-            let values = try? url.resourceValues(forKeys: Set(HomeExclusions.resourceKeys))
+            let values = try? url.resourceValues(forKeys: keys)
             guard let values else { continue }
             let isDirectory = values.isDirectory == true
-            if HomeExclusions.shouldSkip(url, values, denied: denied) {
+            if HomeExclusions.shouldSkip(url, values, deniedPaths: deniedPaths) {
                 if isDirectory { enumerator.skipDescendants() }
                 continue
             }

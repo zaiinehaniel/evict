@@ -9,25 +9,33 @@ enum HomeExclusions {
         .totalFileAllocatedSizeKey, .fileAllocatedSizeKey, .contentModificationDateKey, .creationDateKey,
     ]
 
+    private static let homeURL = FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL
+    private static let homePath = homeURL.path
+    private static let libraryPath = homeURL.appending(path: "Library").path
+
     /// Whether the walker leaves `url` (and everything under it) alone. `denied` folders are skipped too.
     static func shouldSkip(_ url: URL, _ values: URLResourceValues, denied: Set<ProtectedFolder>) -> Bool {
-        if isOutsideHomeOrCloudSynced(url) || values.isUbiquitousItem == true { return true }
-        if url.standardizedFileURL.path == home.appending(path: "Library").path { return true }
+        shouldSkip(url, values, deniedPaths: Set(denied.map { $0.url.standardizedFileURL.path }))
+    }
+
+    /// Same, with the denied folders' standardized paths worked out once by the caller.
+    static func shouldSkip(_ url: URL, _ values: URLResourceValues, deniedPaths: Set<String>) -> Bool {
+        let path = url.standardizedFileURL.path
+        if isCloudOrOutsideHome(path: path, isUbiquitous: values.isUbiquitousItem) || path == libraryPath { return true }
         if values.isHidden == true || values.isPackage == true || values.isSymbolicLink == true { return true }
-        return denied.contains { $0.url.path == url.standardizedFileURL.path }
+        return deniedPaths.contains(path)
     }
 
     /// Outside the home folder, or synced by iCloud, Dropbox, Google Drive, OneDrive or Box.
     /// Unlike `shouldSkip`, this lets the rest of `~/Library` through.
     static func isCloudOrOutsideHome(_ url: URL) -> Bool {
-        isOutsideHomeOrCloudSynced(url) || (try? url.resourceValues(forKeys: [.isUbiquitousItemKey]).isUbiquitousItem) == true
+        let ubiquitous = try? url.resourceValues(forKeys: [.isUbiquitousItemKey]).isUbiquitousItem
+        return isCloudOrOutsideHome(path: url.standardizedFileURL.path, isUbiquitous: ubiquitous)
     }
 
-    private static var home: URL { FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL }
-
-    private static func isOutsideHomeOrCloudSynced(_ url: URL) -> Bool {
-        let path = url.standardizedFileURL.path
-        let homePath = home.path
+    /// The single definition behind both entry points.
+    private static func isCloudOrOutsideHome(path: String, isUbiquitous: Bool?) -> Bool {
+        if isUbiquitous == true { return true }
         guard path.hasPrefix(homePath + "/") else { return true }
         let relative = path.dropFirst(homePath.count + 1)
         guard let first = relative.split(separator: "/").first else { return false }

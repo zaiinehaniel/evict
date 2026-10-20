@@ -75,13 +75,8 @@ final class DiskMonitor {
         let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
         // Docker arrives with the Docker scanner.
         let ids = DiskCategoryID.allCases.filter { $0.group == .appJunk && $0 != .docker }
-        // Never touch a protected folder before the opt-in: the walk then treats all three as denied.
         let enabled = userFilesEnabled
-        let denied = enabled
-            ? await Task.detached { ProtectedFolder.allCases.filter { !$0.hasAccess() } }.value
-            : []
-        if enabled { deniedFolders = denied }
-        let skipped = Set(enabled ? denied : ProtectedFolder.allCases)
+        if !enabled { clearUserFiles() }
         await withTaskGroup(of: Void.self) { group in
             for id in ids {
                 group.addTask {
@@ -89,22 +84,41 @@ final class DiskMonitor {
                     await self.store(items, in: id)
                 }
             }
+            // Before the opt-in nothing touches Your files, protected folders included.
+            guard enabled else { return }
             group.addTask {
-                let found = await UserFilesScanner.scan(denied: skipped)
+                // Each check may sit behind a macOS prompt, so it must not hold up App junk.
+                var denied: [ProtectedFolder] = []
+                for folder in ProtectedFolder.allCases {
+                    if Task.isCancelled { return }
+                    if !folder.hasAccess() { denied.append(folder) }
+                }
+                await self.setDenied(denied)
+                let found = await UserFilesScanner.scan(denied: Set(denied))
                 guard !Task.isCancelled else { return }
                 for id in DiskCategoryID.allCases where id.group == .yourFiles && id != .trash {
                     await self.store(found[id] ?? [], in: id)
                 }
             }
-            if enabled {
-                group.addTask {
-                    let trash = await UserFilesScanner.scanTrash()
-                    await self.store(trash?.items ?? [], in: .trash)
-                }
+            group.addTask {
+                let trash = await UserFilesScanner.scanTrash()
+                await self.store(trash?.items ?? [], in: .trash)
             }
         }
         guard !Task.isCancelled else { return }
         isScanning = false
+    }
+
+    private func setDenied(_ folders: [ProtectedFolder]) {
+        guard !Task.isCancelled else { return }
+        deniedFolders = folders
+    }
+
+    /// Drops Your files results (and the denied list) left from an earlier opted-in run.
+    private func clearUserFiles() {
+        deniedFolders = []
+        for id in DiskCategoryID.allCases where id.group == .yourFiles { categories[id] = nil }
+        Preferences.diskScanCache = DiskCategoryID.allCases.compactMap { categories[$0] }
     }
 
     private func store(_ items: [DiskItem], in id: DiskCategoryID) {

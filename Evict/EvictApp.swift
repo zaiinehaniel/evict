@@ -14,6 +14,8 @@ struct EvictApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItemController: StatusItemController?
     private var autoEvictor: AutoEvictor?
+    /// Passed to `StatusItemController` once the Disk tab exists.
+    let diskMonitor = DiskMonitor()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         #if DEBUG
@@ -24,6 +26,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if CommandLine.arguments.contains("--dump-state") {
             dumpState()
+            return
+        }
+        if CommandLine.arguments.contains("--dump-disk") {
+            dumpDisk()
             return
         }
         #endif
@@ -50,6 +56,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             for group in monitor.background {
                 print("  \(group.name.padding(toLength: 30, withPad: " ", startingAt: 0)) \(Format.memory(group.memory).padding(toLength: 9, withPad: " ", startingAt: 0)) \(group.processCount) processes  \(group.bundlePath ?? "")")
             }
+            NSApp.terminate(nil)
+        }
+    }
+
+    /// Prints what the Disk tab would show, then quits:
+    ///   Evict.app/Contents/MacOS/Evict --dump-disk
+    private func dumpDisk() {
+        Task {
+            let started = Date()
+            await diskMonitor.scanAndWait()
+            if let volume = diskMonitor.volume {
+                print("Disk: \(Format.memory(volume.available)) free of \(Format.memory(volume.total))\(volume.isLow ? "  [low]" : "")")
+            }
+            for id in DiskCategoryID.allCases {
+                guard let category = diskMonitor.category(id) else { continue }
+                print("\n\(String(localized: id.title))  \(Format.memory(category.total))")
+                for item in category.items.sorted(by: { $0.size > $1.size }) {
+                    print("  \(item.name.padding(toLength: 30, withPad: " ", startingAt: 0)) \(Format.memory(item.size).padding(toLength: 9, withPad: " ", startingAt: 0)) \(item.detail ?? "")\(item.isOpen ? "  [open]" : "")")
+                }
+            }
+            print("\nReclaimable: \(Format.memory(diskMonitor.reclaimable(nil)))  (scanned in \(String(format: "%.1f", Date().timeIntervalSince(started))) s)")
             NSApp.terminate(nil)
         }
     }

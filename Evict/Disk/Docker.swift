@@ -22,6 +22,18 @@ enum Docker {
         var errorDescription: String? { String(localized: "Docker didn't start in time") }
     }
 
+    struct NotResponding: LocalizedError {
+        var errorDescription: String? { String(localized: "Docker is open but not responding") }
+    }
+
+    struct NoApp: LocalizedError {
+        var errorDescription: String? { String(localized: "Docker isn't running, and Docker Desktop isn't installed to start it") }
+    }
+
+    enum Status: Equatable {
+        case running, stopped
+    }
+
     static let bundleID = "com.docker.docker"
 
     static var cli: URL? {
@@ -47,10 +59,29 @@ enum Docker {
             .appending(path: "Library/Containers/com.docker.docker/Data/vms/0/data/Docker.raw")
     }
 
+    static var isAppOpen: Bool {
+        !NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).isEmpty
+    }
+
     /// Whether the daemon answers.
     static func isRunning() async -> Bool {
         guard let cli else { return false }
         return (try? await CommandLineTool.run(cli, ["info"], timeout: .seconds(5))) != nil
+    }
+
+    /// Running, or stopped (Docker Desktop closed, or no app and no daemon). Throws for a
+    /// CLI that can't run, and for an open app whose daemon doesn't answer.
+    static func status() async throws -> Status {
+        guard let cli else { return .stopped }
+        if app != nil, !isAppOpen { return .stopped }
+        do {
+            _ = try await CommandLineTool.run(cli, ["info"], timeout: .seconds(5))
+            return .running
+        } catch is CommandLineTool.Failure {
+            // Without the app there's nothing to be "open but not responding".
+            if app == nil { return .stopped }
+            throw NotResponding()
+        }
     }
 
     /// What `docker system df` says is reclaimable, as one item for images and one for build cache.
@@ -80,16 +111,23 @@ enum Docker {
         _ = try await CommandLineTool.run(cli, ["builder", "prune", "-f"], timeout: .seconds(600))
     }
 
-    /// Opens Docker without bringing it forward, then waits for the daemon.
-    static func start() async throws {
-        guard let app else { return }
-        _ = try await CommandLineTool.run(URL(fileURLWithPath: "/usr/bin/open"), ["-g", "-a", app.path])
-        let deadline = ContinuousClock.now + .seconds(120)
-        while ContinuousClock.now < deadline {
-            try await Task.sleep(for: .seconds(2))
-            if await isRunning() { return }
+    /// Opens Docker without bringing it forward, then waits for the daemon. Returns whether
+    /// this call launched it; a Docker it launched is quit again if the start fails.
+    static func start() async throws -> Bool {
+        guard let app else { throw NoApp() }
+        let launched = !isAppOpen
+        do {
+            _ = try await CommandLineTool.run(URL(fileURLWithPath: "/usr/bin/open"), ["-g", "-a", app.path])
+            let deadline = ContinuousClock.now + .seconds(120)
+            while ContinuousClock.now < deadline {
+                try await Task.sleep(for: .seconds(2))
+                if await isRunning() { return launched }
+            }
+            throw StartTimedOut()
+        } catch {
+            if launched { await quit() }
+            throw error
         }
-        throw StartTimedOut()
     }
 
     static func quit() async {

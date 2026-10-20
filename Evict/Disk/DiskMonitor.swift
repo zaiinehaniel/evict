@@ -43,14 +43,15 @@ final class DiskMonitor {
     /// Prunes Docker's unused images and build cache, starting Docker first if it's stopped
     /// and quitting it again only if this call started it.
     func cleanDocker() async {
+        if case .working = docker { return }
+        docker = .working(.cleaning)
         var startedByUs = false
         do {
-            if case .stopped = docker {
+            if try await Docker.status() == .stopped {
                 docker = .working(.starting)
-                try await Docker.start()
-                startedByUs = true
+                startedByUs = try await Docker.start()
+                docker = .working(.cleaning)
             }
-            docker = .working(.cleaning)
             try await Docker.prune()
             if startedByUs {
                 docker = .working(.stopping)
@@ -60,7 +61,7 @@ final class DiskMonitor {
             Preferences.diskScanCache = DiskCategoryID.allCases.compactMap { categories[$0] }
             docker = .cleaned
         } catch {
-            // It may have come up before the failure; leave it as it was found.
+            // A failed start has already quit what it launched.
             if startedByUs { await Docker.quit() }
             docker = .failed(error.localizedDescription)
         }
@@ -142,21 +143,28 @@ final class DiskMonitor {
 
     private func scanDocker() async {
         guard Docker.app != nil || Docker.cli != nil else {
-            docker = .notInstalled
-            store([], in: .docker)
+            setDocker(.notInstalled, items: [])
             return
         }
-        if await Docker.isRunning() {
-            let items = (try? await Docker.usage()) ?? []
-            guard !Task.isCancelled else { return }
-            docker = .running
-            store(items, in: .docker)
-        } else {
-            let size = FileSizes.allocatedSize(of: Docker.vmDisk)
-            guard !Task.isCancelled else { return }
-            docker = .stopped(vmSize: size)
-            store([], in: .docker)
+        do {
+            switch try await Docker.status() {
+            case .running:
+                setDocker(.running, items: try await Docker.usage())
+            case .stopped:
+                setDocker(.stopped(vmSize: FileSizes.allocatedSize(of: Docker.vmDisk)), items: [])
+            }
+        } catch is CancellationError {
+        } catch {
+            setDocker(.failed(error.localizedDescription), items: [])
         }
+    }
+
+    /// Records a scan's result, unless the scan was cancelled or a clean is under way.
+    private func setDocker(_ state: DockerState, items: [DiskItem]) {
+        guard !Task.isCancelled else { return }
+        if case .working = docker { return }
+        docker = state
+        store(items, in: .docker)
     }
 
     private func setDenied(_ folders: [ProtectedFolder]) {

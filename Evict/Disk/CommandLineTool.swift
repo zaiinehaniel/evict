@@ -1,8 +1,12 @@
 import Foundation
 
 enum CommandLineTool {
-    struct Failure: Error {
+    struct Failure: LocalizedError {
         let status: Int32
+
+        var errorDescription: String? {
+            String(localized: "The command failed (exit status \(status))")
+        }
     }
 
     /// Runs a tool with no shell and returns its stdout. Throws on a non-zero exit or a

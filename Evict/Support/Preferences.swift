@@ -9,6 +9,7 @@ enum Preferences {
         static let recentlyEvicted = "recentlyEvicted"
         static let diskScanCache = "diskScanCache"
         static let diskUserFilesEnabled = "diskUserFilesEnabled"
+        static let keptDiskItems = "keptDiskItems"
     }
 
     /// Last-used timestamps keyed by "pid@launchTime", so idle time survives
@@ -40,5 +41,11 @@ enum Preferences {
     static var diskUserFilesEnabled: Bool {
         get { defaults.bool(forKey: Key.diskUserFilesEnabled) }
         set { defaults.set(newValue, forKey: Key.diskUserFilesEnabled) }
+    }
+
+    /// Ids of the disk items the user unchecked, so later scans leave them unchecked too.
+    static var keptDiskItems: [String] {
+        get { defaults.stringArray(forKey: Key.keptDiskItems) ?? [] }
+        set { defaults.set(newValue, forKey: Key.keptDiskItems) }
     }
 }

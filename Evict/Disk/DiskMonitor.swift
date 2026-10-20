@@ -34,6 +34,8 @@ final class DiskMonitor {
     private(set) var failures: [DiskCategoryID: Int] = [:]
 
     @ObservationIgnored private var scanTask: Task<Void, Never>?
+    /// Items removed since the running scan started, so its late results can't bring them back.
+    @ObservationIgnored private var removedDuringScan: Set<String> = []
     private static let removalConcurrency = 4
 
     init() {
@@ -138,6 +140,7 @@ final class DiskMonitor {
     private func runScan() async {
         isScanning = true
         failures = [:]
+        removedDuringScan = []
         volume = DiskVolume.current()
         let listedBefore = categories.mapValues { Set($0.items.map(\.id)) }
         let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
@@ -239,7 +242,7 @@ final class DiskMonitor {
     }
 
     /// Removes each category's items, at most four at a time across all of them. Only items the
-    /// category still lists are removed; the rest count as failures.
+    /// category still lists are removed. Items already gone from the disk leave the list quietly.
     private func remove(_ batches: [DiskCategoryID: [DiskItem]], permanently: Bool) async {
         let batches = batches.filter { id, items in
             id.removal != .docker && !working.contains(id) && !items.isEmpty
@@ -247,27 +250,24 @@ final class DiskMonitor {
         guard !batches.isEmpty else { return }
         working.formUnion(batches.keys)
 
-        var failed: [DiskCategoryID: Int] = [:]
         var queue: [(id: DiskCategoryID, item: DiskItem)] = []
         for (id, items) in batches {
             // The scan's own copy, once per id: never a path the scan didn't list in this category.
+            // One it no longer lists was already dealt with.
             let listed = Dictionary((categories[id]?.items ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
             for itemID in Set(items.map(\.id)) {
-                if let item = listed[itemID] {
-                    queue.append((id, item))
-                } else {
-                    failed[id, default: 0] += 1
-                }
+                if let item = listed[itemID] { queue.append((id, item)) }
             }
         }
 
+        var failed: [DiskCategoryID: Int] = [:]
         var removed: [DiskCategoryID: Set<String>] = [:]
-        await withTaskGroup(of: (id: DiskCategoryID, itemID: String, removed: Bool).self) { group in
+        await withTaskGroup(of: (id: DiskCategoryID, itemID: String, outcome: DiskRemover.Outcome).self) { group in
             var pending = queue[...]
             func add(_ next: (id: DiskCategoryID, item: DiskItem)) {
                 group.addTask {
-                    let done = await DiskRemover.remove(next.item, removal: next.id.removal, permanently: permanently)
-                    return (next.id, next.item.id, done)
+                    let outcome = await DiskRemover.remove(next.item, from: next.id, permanently: permanently)
+                    return (next.id, next.item.id, outcome)
                 }
             }
             for _ in 0..<Self.removalConcurrency {
@@ -275,10 +275,9 @@ final class DiskMonitor {
                 add(next)
             }
             for await result in group {
-                if result.removed {
-                    removed[result.id, default: []].insert(result.itemID)
-                } else {
-                    failed[result.id, default: 0] += 1
+                switch result.outcome {
+                case .removed, .gone: removed[result.id, default: []].insert(result.itemID)
+                case .failed: failed[result.id, default: 0] += 1
                 }
                 if let next = pending.popFirst() { add(next) }
             }
@@ -289,6 +288,7 @@ final class DiskMonitor {
             put(category.items.filter { !gone.contains($0.id) }, in: id)
         }
         let gone = removed.values.reduce(into: Set<String>()) { $0.formUnion($1) }
+        removedDuringScan.formUnion(gone)
         if !kept.isDisjoint(with: gone) {
             kept.subtract(gone)
             Preferences.keptDiskItems = kept.sorted()
@@ -313,7 +313,8 @@ final class DiskMonitor {
 
     private func store(_ items: [DiskItem], in id: DiskCategoryID) {
         guard !Task.isCancelled else { return }
-        put(items, in: id)
+        // A scan that started before a removal may still list what it removed.
+        put(items.filter { !removedDuringScan.contains($0.id) }, in: id)
         Preferences.diskScanCache = DiskCategoryID.allCases.compactMap { categories[$0] }
     }
 

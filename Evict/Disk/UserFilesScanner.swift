@@ -6,7 +6,7 @@ enum UserFilesScanner {
     private static let largeFile: UInt64 = 1 << 30
     private static let installerWords = ["install", "setup", "macos", "-mac", "darwin", "universal", "arm64", "x64"]
 
-    private static var home: URL { FileManager.default.homeDirectoryForCurrentUser }
+    private static var home: URL { DiskRoots.home }
 
     /// One walk of the home folder producing every Your files category except `.trash`, with precedence applied.
     static func scan(denied: Set<ProtectedFolder>) async -> [DiskCategoryID: [DiskItem]] {
@@ -39,7 +39,7 @@ enum UserFilesScanner {
             let parent = url.deletingLastPathComponent().path
 
             if isDirectory {
-                if url.lastPathComponent == "node_modules" {
+                if url.lastPathComponent == DiskRoots.nodeModules {
                     enumerator.skipDescendants()
                     if let item = staleNodeModules(url) { found[.nodeModules, default: []].append(item) }
                 } else if parent == downloads, isOlderThan(staleDownload, FileSizes.newestModification(in: url)) {
@@ -68,7 +68,7 @@ enum UserFilesScanner {
 
     /// The Trash's entries, or nil when it can't be listed (no Full Disk Access).
     static func scanTrash() async -> DiskCategory? {
-        let trash = home.appending(path: ".Trash")
+        let trash = DiskRoots.trash
         guard let entries = try? FileManager.default.contentsOfDirectory(at: trash, includingPropertiesForKeys: nil) else {
             return nil
         }
@@ -93,13 +93,13 @@ enum UserFilesScanner {
 
     /// `~/Library/Developer/Xcode/Archives/*/*.xcarchive` older than 90 days. The one Library path read here.
     private static func xcodeArchives() -> [DiskItem] {
-        let root = home.appending(path: "Library/Developer/Xcode/Archives")
+        let root = DiskRoots.archives
         let fileManager = FileManager.default
         let days = (try? fileManager.contentsOfDirectory(at: root, includingPropertiesForKeys: nil)) ?? []
         var items: [DiskItem] = []
         for day in days {
             let archives = (try? fileManager.contentsOfDirectory(at: day, includingPropertiesForKeys: nil)) ?? []
-            for archive in archives where archive.pathExtension == "xcarchive" {
+            for archive in archives where archive.pathExtension == DiskRoots.archiveExtension {
                 if Task.isCancelled { return [] }
                 guard let created = try? archive.resourceValues(forKeys: [.creationDateKey]).creationDate,
                       isOlderThan(staleDownload, created) else { continue }
@@ -114,7 +114,7 @@ enum UserFilesScanner {
         let project = modules.deletingLastPathComponent()
         let siblings = (try? FileManager.default.contentsOfDirectory(
             at: project, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
-        let dates = siblings.filter { $0.lastPathComponent != "node_modules" }
+        let dates = siblings.filter { $0.lastPathComponent != DiskRoots.nodeModules }
             .compactMap { try? $0.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate }
         let newest = dates.max() ?? (try? project.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
         guard isOlderThan(staleProject, newest) else { return nil }

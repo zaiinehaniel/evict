@@ -2,20 +2,7 @@ import AppKit
 import Foundation
 
 enum AppJunkScanner {
-    /// Package-manager caches, as (name, path under home). Also skipped by the app caches scan.
-    private static let packageCaches: [(name: String, path: String)] = [
-        ("Homebrew", "Library/Caches/Homebrew"),
-        ("npm", ".npm/_cacache"),
-        ("pip", "Library/Caches/pip"),
-        ("Yarn", "Library/Caches/Yarn"),
-        ("pnpm", "Library/pnpm/store"),
-        ("CocoaPods", "Library/Caches/CocoaPods"),
-        ("Gradle", ".gradle/caches"),
-        ("SwiftPM", "Library/Caches/org.swift.swiftpm"),
-    ]
     private static let minimumCacheSize: UInt64 = 1_048_576
-
-    private static var home: URL { FileManager.default.homeDirectoryForCurrentUser }
 
     /// Everything in `id` that can go. Docker has its own scanner.
     static func scan(_ id: DiskCategoryID, runningBundleIDs: Set<String>) async -> [DiskItem] {
@@ -32,20 +19,18 @@ enum AppJunkScanner {
     // MARK: Categories
 
     private static func buildData() async -> [DiskItem] {
-        let root = home.appending(path: "Library/Developer/Xcode/DerivedData")
-        let folders = folders(in: root).filter { $0.lastPathComponent != "ModuleCache.noindex" }
+        let folders = folders(in: DiskRoots.derivedData).filter { $0.lastPathComponent != "ModuleCache.noindex" }
         return await items(for: folders) { url in
             (name: projectName(url.lastPathComponent), detail: nil)
         }
     }
 
     private static func deviceSupport() async -> [DiskItem] {
-        let xcode = home.appending(path: "Library/Developer/Xcode")
-        let platforms = folders(in: xcode).filter { $0.lastPathComponent.hasSuffix("DeviceSupport") }
+        let platforms = folders(in: DiskRoots.xcode).filter { $0.lastPathComponent.hasSuffix(DiskRoots.deviceSupportSuffix) }
         var details: [URL: String] = [:]
         var all: [URL] = []
         for platform in platforms {
-            let name = platform.lastPathComponent.replacingOccurrences(of: " DeviceSupport", with: "")
+            let name = platform.lastPathComponent.replacingOccurrences(of: " " + DiskRoots.deviceSupportSuffix, with: "")
             for folder in folders(in: platform) {
                 details[folder] = name
                 all.append(folder)
@@ -61,7 +46,7 @@ enum AppJunkScanner {
         guard let data = try? await CommandLineTool.run(URL(filePath: "/usr/bin/xcrun"),
                                                         ["simctl", "list", "devices", "unavailable", "-j"]),
               let list = try? JSONDecoder().decode(SimulatorList.self, from: data) else { return [] }
-        let devices = home.appending(path: "Library/Developer/CoreSimulator/Devices")
+        let devices = DiskRoots.simulatorDevices
         var found: [(udid: String, name: String, runtime: String)] = []
         for (runtime, entries) in list.devices {
             for entry in entries { found.append((entry.udid, entry.name, prettyRuntime(runtime))) }
@@ -83,7 +68,7 @@ enum AppJunkScanner {
     }
 
     private static func packageCacheItems() async -> [DiskItem] {
-        let existing = packageCaches.map { (name: $0.name, url: home.appending(path: $0.path)) }
+        let existing = DiskRoots.packageCaches
             .filter { FileManager.default.fileExists(atPath: $0.url.path) }
         let names = Dictionary(uniqueKeysWithValues: existing.map { ($0.url, $0.name) })
         return await items(for: existing.map(\.url)) { url in
@@ -92,10 +77,9 @@ enum AppJunkScanner {
     }
 
     private static func appCaches(runningBundleIDs: Set<String>) async -> [DiskItem] {
-        let root = home.appending(path: "Library/Caches")
-        let packagePaths = Set(packageCaches.map { home.appending(path: $0.path).path })
-        let candidates = folders(in: root).filter { url in
-            !url.lastPathComponent.hasPrefix("com.apple.") && !packagePaths.contains(url.path)
+        let packagePaths = Set(DiskRoots.packageCaches.map(\.url.path))
+        let candidates = folders(in: DiskRoots.caches).filter { url in
+            !url.lastPathComponent.hasPrefix(DiskRoots.appleCachePrefix) && !packagePaths.contains(url.path)
         }
         let all = await items(for: candidates, minimumSize: minimumCacheSize) { url in
             let folder = url.lastPathComponent

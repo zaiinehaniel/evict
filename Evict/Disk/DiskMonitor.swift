@@ -112,12 +112,16 @@ final class DiskMonitor {
     }
 
     func setKept(_ kept: Bool, _ item: DiskItem) {
-        if kept {
-            self.kept.insert(item.id)
-        } else {
-            self.kept.remove(item.id)
-        }
-        Preferences.keptDiskItems = self.kept.sorted()
+        setKept(kept, [item])
+    }
+
+    /// Keeps or un-keeps several items with one write, for "Select all".
+    func setKept(_ kept: Bool, _ items: [DiskItem]) {
+        let ids = Set(items.map(\.id))
+        let updated = kept ? self.kept.union(ids) : self.kept.subtracting(ids)
+        guard updated != self.kept else { return }
+        self.kept = updated
+        Preferences.keptDiskItems = updated.sorted()
     }
 
     /// Removes `items` from category `id`: moved to the Trash, deleted, or (for the Trash) emptied,

@@ -40,6 +40,15 @@ enum Format {
         return hours % 24 == 0 ? "\(hours / 24)d" : "\(hours / 24)d \(hours % 24)h"
     }
 
+    /// "8 months", "1 year", "3 days" — how long ago, in its largest whole unit. Localized.
+    static func age(since date: Date, now: Date = Date()) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.year, .month, .weekOfMonth, .day, .hour, .minute]
+        formatter.maximumUnitCount = 1
+        formatter.unitsStyle = .full
+        return formatter.string(from: max(now.timeIntervalSince(date), 60)) ?? ""
+    }
+
     /// "30 minutes", "1 hour", "8 hours" — localized.
     static func longDuration(minutes: Int) -> String {
         Duration.seconds(minutes * 60).formatted(.units(allowed: [.hours, .minutes], width: .wide))

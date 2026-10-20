@@ -54,21 +54,13 @@ struct DiskCategoryRow: View {
             }
         }
         guard category != nil else { return nil }
-        return .remove(permanently: id.removal != .trash || OptionKey.shared.isDown)
+        return .remove(permanently: id.removesPermanently(optionDown: OptionKey.shared.isDown))
     }
 
     private func title(for action: Action) -> LocalizedStringKey {
         switch action {
         case .clean(let opens): opens ? "Open and clean" : "Clean"
-        case .remove(let permanently): removalTitle(permanently: permanently)
-        }
-    }
-
-    private func removalTitle(permanently: Bool) -> LocalizedStringKey {
-        switch id.removal {
-        case .trash: permanently ? "Delete" : "Move to Trash"
-        case .emptyTrash: "Empty"
-        case .delete, .simctl, .docker: "Delete"
+        case .remove(let permanently): id.removalTitle(permanently: permanently)
         }
     }
 
@@ -205,7 +197,7 @@ struct DiskCategoryRow: View {
             }
             .keyboardShortcut(.cancelAction)
 
-            Button(removalTitle(permanently: permanently)) { confirm(permanently: permanently) }
+            Button(id.removalTitle(permanently: permanently)) { confirm(permanently: permanently) }
                 .keyboardShortcut(.defaultAction)
                 .tint(permanently ? .red : nil)
                 .buttonStyle(.borderedProminent)
@@ -218,5 +210,30 @@ struct DiskCategoryRow: View {
         if let size { parts.append(Format.disk(size)) }
         if let detail { parts.append(detail.text) }
         return parts.joined(separator: ", ")
+    }
+}
+
+/// How a category's removal is worded and whether it deletes for good, shared by its row and its items screen.
+extension DiskCategoryID {
+    /// Everything but Move to Trash deletes for good, and ⌥ turns Move to Trash into Delete.
+    func removesPermanently(optionDown: Bool) -> Bool {
+        removal != .trash || optionDown
+    }
+
+    /// "Move to Trash", "Delete", "Empty".
+    func removalTitle(permanently: Bool) -> LocalizedStringKey {
+        switch removal {
+        case .trash: permanently ? "Delete" : "Move to Trash"
+        case .emptyTrash: "Empty"
+        case .delete, .simctl, .docker: "Delete"
+        }
+    }
+
+    /// "Move 3 to Trash · 1.2 GB", "Delete 3 · 1.2 GB" — for some of the items rather than all of them.
+    func removalTitle(permanently: Bool, count: Int, size: UInt64) -> LocalizedStringKey {
+        if removal == .trash, !permanently {
+            return "Move \(count) to Trash · \(Format.disk(size))"
+        }
+        return "Delete \(count) · \(Format.disk(size))"
     }
 }

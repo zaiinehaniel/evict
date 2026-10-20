@@ -26,7 +26,7 @@ struct PopoverView: View {
 
     @AppStorage("sortOrder") private var sortOrder: SortOrder = .worthClosing
     @AppStorage(PopoverTab.storageKey) private var tab: PopoverTab = .memory
-    /// The Disk category opened from its row, to show its items in place of the overview. Not drawn yet.
+    /// The Disk category opened from its row, shown in place of the whole Disk tab. Forgotten when the popover closes.
     @State private var openCategory: DiskCategoryID?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -47,6 +47,10 @@ struct PopoverView: View {
             openCategory = nil
             // Opening the popover on the Disk tab scans from `StatusItemController`; switching to it scans here.
             if tab == .disk { diskMonitor.scan() } else { diskMonitor.cancelScan() }
+        }
+        // The popover's content outlives each opening; the next one starts on the overview.
+        .onReceive(NotificationCenter.default.publisher(for: NSPopover.didCloseNotification)) { _ in
+            openCategory = nil
         }
     }
 
@@ -211,14 +215,34 @@ struct PopoverView: View {
 
     // MARK: - Disk
 
+    /// Pushes a category's items in from the trailing edge, or fades under Reduce Motion.
+    private var pushAnimation: Animation { reduceMotion ? .easeOut(duration: 0.15) : .easeInOut(duration: 0.2) }
+
     private var diskTab: some View {
-        VStack(spacing: 0) {
-            diskHeader
-            Divider()
-            DiskOverview(diskMonitor: diskMonitor) { openCategory = $0 }
-            Divider()
-            diskFooter
+        ZStack {
+            if let id = openCategory {
+                // A category emptied by a background scan keeps its screen: it works on its own snapshot.
+                DiskCategoryDetail(category: diskMonitor.category(id) ?? DiskCategory(id: id, items: [], total: 0),
+                                   diskMonitor: diskMonitor) {
+                    withAnimation(pushAnimation) { openCategory = nil }
+                }
+                .id(id)
+                .transition(reduceMotion ? .opacity : .move(edge: .trailing))
+            } else {
+                VStack(spacing: 0) {
+                    diskHeader
+                    Divider()
+                    DiskOverview(diskMonitor: diskMonitor) { id in
+                        diskMonitor.pendingConfirmation = nil
+                        withAnimation(pushAnimation) { openCategory = id }
+                    }
+                    Divider()
+                    diskFooter
+                }
+                .transition(reduceMotion ? .opacity : .move(edge: .leading))
+            }
         }
+        .clipped()
     }
 
     private var diskHeader: some View {

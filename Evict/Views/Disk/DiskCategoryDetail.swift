@@ -226,6 +226,7 @@ struct DiskCategoryDetail: View {
                     .tint(permanently ? .red : nil)
                     .monospacedDigit()
                     .lineLimit(1)
+                    .fixedSize()
                     .disabled(checked.isEmpty || diskMonitor.working.contains(id))
             }
 

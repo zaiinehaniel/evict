@@ -122,6 +122,7 @@ struct DiskCategoryRow: View {
                 Text(id.title)
                     .lineLimit(1)
                     .truncationMode(.tail)
+                    .layoutPriority(1)
                 if let detail {
                     Text(detail.text)
                         .font(.caption)
@@ -143,6 +144,7 @@ struct DiskCategoryRow: View {
                     Text(Format.disk(size))
                         .monospacedDigit()
                         .foregroundStyle(category == nil ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary))
+                        .fixedSize()
                 }
                 if isWorking {
                     ProgressView()
@@ -151,6 +153,7 @@ struct DiskCategoryRow: View {
                 } else if let action {
                     Button(title(for: action)) { perform(action) }
                         .controlSize(.small)
+                        .fixedSize()
                         .disabled(!isDocker && !hasSelection)
                 }
                 Image(systemName: "chevron.right")

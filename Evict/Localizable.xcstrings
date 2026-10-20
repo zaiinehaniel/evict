@@ -1050,7 +1050,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Baixados antigos"
+            "value": "Downloads antigos"
           }
         }
       }
@@ -1590,7 +1590,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Build do Xcode"
+            "value": "Dados de build do Xcode"
           }
         }
       }

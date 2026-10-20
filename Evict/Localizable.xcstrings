@@ -1590,7 +1590,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dados de build do Xcode"
+            "value": "Build do Xcode"
           }
         }
       }

@@ -30,7 +30,9 @@ struct DiskOverview: View {
         switch diskMonitor.docker {
         case .notInstalled: false
         case .running: diskMonitor.category(.docker) != nil
-        case .stopped, .working, .failed, .cleaned: true
+        // A CLI-only install (Colima, OrbStack…) that's off: Evict can't start it, so there's nothing to offer.
+        case .stopped: Docker.app != nil
+        case .working, .failed, .cleaned: true
         }
     }
 

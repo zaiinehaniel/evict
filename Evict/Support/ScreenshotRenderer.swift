@@ -14,9 +14,16 @@ enum ScreenshotRenderer {
 
     static func render(to directory: URL) {
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        for (name, appearance) in [("popover-light", NSAppearance.Name.aqua), ("popover-dark", .darkAqua)] {
-            let view = PopoverView(monitor: demoMonitor())
+        let shots: [(String, NSAppearance.Name, PopoverTab)] = [
+            ("popover-light", .aqua, .memory), ("popover-dark", .darkAqua, .memory),
+            ("disk-light", .aqua, .disk), ("disk-dark", .darkAqua, .disk),
+        ]
+        for (name, appearance, tab) in shots {
+            screenshotDefaults.set(tab.rawValue, forKey: PopoverTab.storageKey)
+            let view = PopoverView(monitor: demoMonitor(), diskMonitor: demoDiskMonitor())
                 .background(Color(nsColor: .windowBackgroundColor))
+                // Not the user's defaults, so the Memory tab is drawn whichever tab they last used.
+                .defaultAppStorage(screenshotDefaults)
                 .environment(\.controlActiveState, .key)
             let hosting = NSHostingView(rootView: view)
             hosting.appearance = NSAppearance(named: appearance)
@@ -74,8 +81,30 @@ enum ScreenshotRenderer {
         }
     }
 
+    /// Only the popover's tab is written here, so each shot picks its tab without touching the user's defaults.
+    private static let screenshotDefaults = UserDefaults(suiteName: "com.hanielcortes.evict.screenshots") ?? .standard
+
     private final class KeyWindow: NSWindow {
         override var canBecomeKey: Bool { true }
+    }
+
+    private static func demoDiskMonitor() -> DiskMonitor {
+        let gb: Double = 1_000_000_000  // The Disk tab counts in decimal GB, like Finder.
+        func item(_ name: String, _ detail: String?, _ sizeGB: Double, daysAgo: Double? = nil) -> DiskItem {
+            DiskItem(id: "/demo/\(name)", name: name, detail: detail, path: "/demo/\(name)", isDirectory: true,
+                     size: UInt64(sizeGB * gb), lastUsed: daysAgo.map { Date().addingTimeInterval(-$0 * 86_400) })
+        }
+        return DiskMonitor(
+            demoCategories: [
+                (.xcodeBuildData, [item("Evict-abc", nil, 8.6), item("Cumbaru-def", nil, 5.6)]),
+                (.packageCaches, [item("Homebrew", nil, 3.1)]),
+                (.installers, [item("Xcode.dmg", nil, 1.9, daysAgo: 120), item("Setup.pkg", nil, 0.9, daysAgo: 200)]),
+                (.oldDownloads, [item("Footage.zip", nil, 2.1, daysAgo: 150), item("Slides.key", nil, 1.2, daysAgo: 95)]),
+            ],
+            dockerVMSize: UInt64(38 * gb),
+            volume: DiskVolume(available: UInt64(61 * gb), total: UInt64(500 * gb)),
+            userFilesEnabled: true
+        )
     }
 
     private static func demoMonitor() -> AppMonitor {

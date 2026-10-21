@@ -16,6 +16,21 @@ enum Format {
         (Double(bytes) / gibibyte).formatted(.number.precision(.fractionLength(fractionDigits)))
     }
 
+    /// "820 MB", "14.2 GB", "1.2 TB" — decimal units, like Finder (1 GB = 10⁹ bytes).
+    static func disk(_ bytes: UInt64) -> String {
+        let value = Double(bytes)
+        if bytes == 0 { return "0 MB" }
+        if value < 1e6 { return "<1 MB" }
+        if value < 999.5e6 { return "\(Int((value / 1e6).rounded())) MB" }
+        if value < 999.95e9 { return (value / 1e9).formatted(.number.precision(.fractionLength(1))) + " GB" }
+        return (value / 1e12).formatted(.number.precision(.fractionLength(1))) + " TB"
+    }
+
+    /// Whole decimal gigabytes, "412" — for the disk gauge.
+    static func diskGigabytes(_ bytes: UInt64) -> String {
+        (Double(bytes) / 1e9).formatted(.number.precision(.fractionLength(0)))
+    }
+
     /// "45m", "3h 12m", "2d 4h".
     static func duration(_ interval: TimeInterval) -> String {
         let minutes = Int(interval / 60)
@@ -23,6 +38,15 @@ enum Format {
         let hours = minutes / 60
         if hours < 24 { return minutes % 60 == 0 ? "\(hours)h" : "\(hours)h \(minutes % 60)m" }
         return hours % 24 == 0 ? "\(hours / 24)d" : "\(hours / 24)d \(hours % 24)h"
+    }
+
+    /// "8 months", "1 year", "3 days" — how long ago, in its largest whole unit. Localized.
+    static func age(since date: Date, now: Date = Date()) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.year, .month, .weekOfMonth, .day, .hour, .minute]
+        formatter.maximumUnitCount = 1
+        formatter.unitsStyle = .full
+        return formatter.string(from: max(now.timeIntervalSince(date), 60)) ?? ""
     }
 
     /// "30 minutes", "1 hour", "8 hours" — localized.

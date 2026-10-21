@@ -7,6 +7,9 @@ enum Preferences {
     private enum Key {
         static let lastUsedByProcess = "lastUsedByProcess"
         static let recentlyEvicted = "recentlyEvicted"
+        static let diskScanCache = "diskScanCache"
+        static let diskUserFilesEnabled = "diskUserFilesEnabled"
+        static let keptDiskItems = "keptDiskItems"
     }
 
     /// Last-used timestamps keyed by "pid@launchTime", so idle time survives
@@ -23,5 +26,26 @@ enum Preferences {
             return (try? JSONDecoder().decode([EvictedApp].self, from: data)) ?? []
         }
         set { defaults.set(try? JSONEncoder().encode(newValue), forKey: Key.recentlyEvicted) }
+    }
+
+    /// The last disk scan, so the Disk tab never opens empty.
+    static var diskScanCache: [DiskCategory] {
+        get {
+            guard let data = defaults.data(forKey: Key.diskScanCache) else { return [] }
+            return (try? JSONDecoder().decode([DiskCategory].self, from: data)) ?? []
+        }
+        set { defaults.set(try? JSONEncoder().encode(newValue), forKey: Key.diskScanCache) }
+    }
+
+    /// Whether the user opted in to scanning Downloads, Desktop and Documents.
+    static var diskUserFilesEnabled: Bool {
+        get { defaults.bool(forKey: Key.diskUserFilesEnabled) }
+        set { defaults.set(newValue, forKey: Key.diskUserFilesEnabled) }
+    }
+
+    /// Ids of the disk items the user unchecked, so later scans leave them unchecked too.
+    static var keptDiskItems: [String] {
+        get { defaults.stringArray(forKey: Key.keptDiskItems) ?? [] }
+        set { defaults.set(newValue, forKey: Key.keptDiskItems) }
     }
 }

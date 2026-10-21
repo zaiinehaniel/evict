@@ -32,6 +32,12 @@ It informs; you decide. No scary warnings, no "optimization scores".
 - **Easy to undo.** Recently evicted apps are one click away from coming back.
 - **Kind to your battery.** On battery or in Low Power Mode, apps count as idle
   after half the time, and apps burning CPU in the background are called out.
+- **Frees disk space.** A Disk tab shows what's safe to clear. Each category
+  (Xcode build data, simulators, package and app caches, old downloads,
+  installers, large files) clears in one click, or open it to pick items one by
+  one. App junk is deleted; your own files go to the Trash, or hold ⌥ to delete
+  them for good. Nothing from iCloud Drive, other cloud folders or the system is
+  touched, and Docker is cleaned even when it's off.
 - **Stays out of the way.** Menu bar only, optional memory % next to the icon,
   launch at login. Light and dark mode, VoiceOver, Reduce Motion and Increase
   Contrast. English and Português (Brasil).
@@ -57,6 +63,10 @@ Or by hand:
    - open **System Settings → Privacy & Security**, scroll down and click
      **Open Anyway** next to the message about Evict, or
    - run `xattr -dr com.apple.quarantine /Applications/Evict.app` in Terminal.
+
+The Disk tab only looks at your Downloads, Desktop and Documents folders after you
+click **Check your files**, and macOS asks for access to each. It may ask again
+after an update, because Evict isn't notarized.
 
 Requires macOS 14 Sonoma or later (detecting apps playing audio or on a call needs
 macOS 14.2+).

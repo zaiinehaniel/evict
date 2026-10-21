@@ -166,23 +166,20 @@ final class DiskMonitor {
         failures = [:]
         removedDuringScan = []
         volume = DiskVolume.current()
-        let listedBefore = categories.mapValues { Set($0.items.map(\.id)) }
         let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
         let ids = DiskCategoryID.allCases.filter { $0.group == .appJunk && $0 != .docker }
         let enabled = userFilesEnabled
         if !enabled { clearUserFiles() }
         var scanDocker = true
         if case .working = docker { scanDocker = false }
-        // Each task returns the categories it scanned in full.
-        let scanned = await withTaskGroup(of: [DiskCategoryID].self) { group in
+        await withTaskGroup(of: Void.self) { group in
             if scanDocker {
-                group.addTask { await self.scanDocker() ? [.docker] : [] }
+                group.addTask { await self.scanDocker() }
             }
             for id in ids {
                 group.addTask {
                     let items = await AppJunkScanner.scan(id, runningBundleIDs: running)
                     await self.store(items, in: id)
-                    return [id]
                 }
             }
             // Before the opt-in nothing touches Your files, protected folders included.
@@ -191,78 +188,77 @@ final class DiskMonitor {
                     // Each check may sit behind a macOS prompt, so it must not hold up App junk.
                     var denied: [ProtectedFolder] = []
                     for folder in ProtectedFolder.allCases {
-                        if Task.isCancelled { return [] }
+                        if Task.isCancelled { return }
                         if !folder.hasAccess() { denied.append(folder) }
                     }
                     await self.setDenied(denied)
                     let found = await UserFilesScanner.scan(denied: Set(denied))
-                    guard !Task.isCancelled else { return [] }
-                    let walked = DiskCategoryID.allCases.filter { $0.group == .yourFiles && $0 != .trash }
-                    for id in walked {
+                    guard !Task.isCancelled else { return }
+                    for id in DiskCategoryID.allCases where id.group == .yourFiles && id != .trash {
                         await self.store(found[id] ?? [], in: id)
                     }
-                    // A denied folder wasn't looked at, so what was in it may still be there.
-                    return denied.isEmpty ? walked : []
                 }
                 group.addTask {
                     let trash = await UserFilesScanner.scanTrash()
                     await self.store(trash?.items ?? [], in: .trash)
-                    return trash == nil ? [] : [.trash]
                 }
             }
-            var scanned: Set<DiskCategoryID> = []
-            for await ids in group { scanned.formUnion(ids) }
-            return scanned
         }
         guard !Task.isCancelled else { return }
-        pruneKept(listedBefore: listedBefore, scanned: scanned)
+        await pruneKept()
         isScanning = false
     }
 
-    /// Forgets the kept ids that are gone: listed nowhere now, and listed before only by categories
-    /// this scan covered in full. An id no category listed before is forgotten only after a scan of everything.
-    private func pruneKept(listedBefore: [DiskCategoryID: Set<String>], scanned: Set<DiskCategoryID>) {
-        let listed = Set(categories.values.flatMap { $0.items.map(\.id) })
-        let scannedEverything = scanned == Set(DiskCategoryID.allCases)
-        let gone = kept.filter { id in
-            guard !listed.contains(id) else { return false }
-            let owners = listedBefore.filter { $0.value.contains(id) }.keys
-            return owners.isEmpty ? scannedEverything : owners.allSatisfy(scanned.contains)
+    /// Forgets the kept ids whose item is gone. Not ones that merely stopped matching their
+    /// category's rules: a kept item stays kept until it disappears. Anything it can't be sure of stays.
+    private func pruneKept() async {
+        var gone = Set<String>()
+        for id in kept where id.hasPrefix("/") {
+            var info = stat()
+            if lstat(id, &info) != 0, errno == ENOENT { gone.insert(id) }
         }
-        guard !gone.isEmpty else { return }
+        // Only a full list that worked says a simulator is gone.
+        let simulatorPrefix = "simctl:"
+        if kept.contains(where: { $0.hasPrefix(simulatorPrefix) }), let all = await DiskRemover.simulators([]) {
+            let known = Set(all.compactMap { UUID(uuidString: $0) })
+            for id in kept where id.hasPrefix(simulatorPrefix) {
+                if let udid = UUID(uuidString: String(id.dropFirst(simulatorPrefix.count))), !known.contains(udid) {
+                    gone.insert(id)
+                }
+            }
+        }
+        if docker == .notInstalled {
+            gone.formUnion(kept.filter { $0.hasPrefix("docker:") })
+        }
+        guard !Task.isCancelled, !gone.isEmpty else { return }
         kept.subtract(gone)
         Preferences.keptDiskItems = kept.sorted()
     }
 
-    /// Whether Docker's items were listed in full (it's running, or not installed at all).
-    private func scanDocker() async -> Bool {
+    private func scanDocker() async {
         guard Docker.app != nil || Docker.cli != nil else {
             return setDocker(.notInstalled, items: [])
         }
         do {
             switch try await Docker.status() {
             case .running:
-                return setDocker(.running, items: try await Docker.usage())
+                setDocker(.running, items: try await Docker.usage())
             case .stopped:
                 setDocker(.stopped(vmSize: FileSizes.allocatedSize(of: Docker.vmDisk)), items: [])
-                return false
             }
         } catch is CancellationError {
-            return false
+            return
         } catch {
             setDocker(.failed(error.localizedDescription), items: [])
-            return false
         }
     }
 
-    /// Records a scan's result, unless the scan was cancelled or a clean is under way. False if it didn't.
-    @discardableResult
-    private func setDocker(_ state: DockerState, items: [DiskItem]) -> Bool {
-        guard !Task.isCancelled else { return false }
-        if case .working = docker { return false }
+    /// Records a scan's result, unless the scan was cancelled or a clean is under way.
+    private func setDocker(_ state: DockerState, items: [DiskItem]) {
+        guard !Task.isCancelled else { return }
+        if case .working = docker { return }
         docker = state
         store(items, in: .docker)
-        return true
     }
 
     /// Removes each category's items, at most four at a time across all of them. Only items the

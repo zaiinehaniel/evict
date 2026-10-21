@@ -120,7 +120,7 @@ enum DiskRemover {
     }
 
     /// The UDIDs `simctl list devices <filter>` prints, or nil if it can't be listed.
-    private static func simulators(_ filter: [String]) async -> [String]? {
+    static func simulators(_ filter: [String]) async -> [String]? {
         guard let data = try? await CommandLineTool.run(xcrun, ["simctl", "list", "devices"] + filter + ["-j"]),
               let list = try? JSONDecoder().decode(SimulatorList.self, from: data) else { return nil }
         return list.devices.values.joined().map(\.udid)

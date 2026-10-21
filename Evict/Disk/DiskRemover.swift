@@ -52,7 +52,8 @@ enum DiskRemover {
     }
 
     /// Whether the item is still what the scan found: a literal path where `category` lists items,
-    /// under the home folder, outside every cloud folder, reached without symlinks, and the same kind of item.
+    /// under the home folder and on its volume, outside every cloud folder, reached without symlinks,
+    /// and the same kind of item.
     private static func validate(_ item: DiskItem, in category: DiskCategoryID) -> Validation {
         guard let path = item.path, path == item.id, path.hasPrefix("/") else { return .refused }
         // No "." or ".." and no empty components, so the path means exactly what it says.
@@ -67,6 +68,8 @@ enum DiskRemover {
 
         var info = stat()
         guard lstat(path, &info) == 0 else { return errno == ENOENT ? .gone : .refused }
+        // Never on another volume mounted under ~, which the scan doesn't walk.
+        guard HomeExclusions.isHomeVolume(info.st_dev) else { return .refused }
         // No folder above it is a symlink: resolving the parent changes nothing.
         guard let slash = path.lastIndex(of: "/") else { return .refused }
         let parent = String(path[..<slash])

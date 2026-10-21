@@ -1,6 +1,7 @@
+import Darwin
 import Foundation
 
-/// The "Never scanned" rules: nothing from Drive, iCloud or the OS.
+/// The "Never scanned" rules: nothing from Drive, iCloud, the OS or another volume.
 enum HomeExclusions {
     private static let cloudPrefixes = ["Dropbox", "Google Drive", "OneDrive", "Box", "iCloud Drive"]
 
@@ -23,7 +24,28 @@ enum HomeExclusions {
         let path = url.standardizedFileURL.path
         if isCloudOrOutsideHome(path: path, isUbiquitous: values.isUbiquitousItem) || path == libraryPath { return true }
         if values.isHidden == true || values.isPackage == true || values.isSymbolicLink == true { return true }
+        // A disk image, network share or FUSE mount under ~ (OrbStack, sshfs, rclone…). Checked on folders
+        // only: a file can't be on another volume without its folder being on it too.
+        if values.isDirectory == true, !isOnHomeVolume(path) { return true }
         return deniedPaths.contains(path)
+    }
+
+    /// The device the home folder lives on, nil if it can't be read.
+    private static let homeDevice = device(of: homePath)
+
+    /// Whether `device` (a `stat`'s `st_dev`) is the home folder's volume.
+    static func isHomeVolume(_ device: dev_t) -> Bool {
+        homeDevice == device
+    }
+
+    /// Whether `path` itself (not what a symlink there points to) is on the home folder's volume.
+    private static func isOnHomeVolume(_ path: String) -> Bool {
+        device(of: path).map(isHomeVolume) ?? false
+    }
+
+    private static func device(of path: String) -> dev_t? {
+        var info = stat()
+        return lstat(path, &info) == 0 ? info.st_dev : nil
     }
 
     /// Outside the home folder, or synced by iCloud, Dropbox, Google Drive, OneDrive or Box.

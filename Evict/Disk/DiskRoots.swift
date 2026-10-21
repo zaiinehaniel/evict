@@ -56,9 +56,10 @@ enum DiskRoots {
         case .oldDownloads:
             return parent == downloads
         case .largeFiles:
-            return !isDirectory && isLooseInHome(path)
+            // The walk also finds big files sitting right in ~.
+            return !isDirectory && isLooseInHome(path, depth: 1)
         case .nodeModules:
-            return isDirectory && name == nodeModules && isLooseInHome(path)
+            return isDirectory && name == nodeModules && isLooseInHome(path, depth: 2)
         case .trash:
             return parent == trash.path
         case .simulators, .docker:
@@ -67,12 +68,12 @@ enum DiskRoots {
         }
     }
 
-    /// What the home walk can list: below a top-level home folder (never one itself), outside
-    /// `~/Library`, and inside no hidden folder.
-    private static func isLooseInHome(_ path: String) -> Bool {
+    /// What the home walk can list: at least `depth` levels below ~ (2 keeps out the top-level
+    /// home folders themselves), outside `~/Library`, and neither hidden nor inside a hidden folder.
+    private static func isLooseInHome(_ path: String, depth: Int) -> Bool {
         guard path.hasPrefix(home.path + "/") else { return false }
         let components = path.dropFirst(home.path.count + 1).split(separator: "/")
-        return components.count >= 2 && components.first != "Library" && !components.contains { $0.hasPrefix(".") }
+        return components.count >= depth && components.first != "Library" && !components.contains { $0.hasPrefix(".") }
     }
 
     /// Everything before the last "/" ("" for "/x").

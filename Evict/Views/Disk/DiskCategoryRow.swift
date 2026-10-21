@@ -22,6 +22,8 @@ struct DiskCategoryRow: View {
 
     private var confirmation: DiskConfirmation? {
         guard case .category(id, _) = diskMonitor.pendingConfirmation else { return nil }
+        // Docker's clean can stop being possible while it waits (a scan finds it gone).
+        if isDocker, action == nil { return nil }
         return diskMonitor.pendingConfirmation
     }
 
@@ -39,7 +41,7 @@ struct DiskCategoryRow: View {
     private enum Action {
         /// Asks to confirm a removal; `permanently` deletes what would otherwise go to the Trash.
         case remove(permanently: Bool)
-        /// Docker: prunes right away, starting Docker first when `opens`.
+        /// Docker: asks to confirm a prune, which starts Docker first when `opens`.
         case clean(opens: Bool)
     }
 
@@ -68,16 +70,20 @@ struct DiskCategoryRow: View {
     private var hasSelection: Bool { !diskMonitor.selection(in: id).isEmpty }
 
     private func perform(_ action: Action) {
-        switch action {
-        case .remove(let permanently):
-            withAnimation(animation) { diskMonitor.pendingConfirmation = .category(id, permanently: permanently) }
-        case .clean:
-            diskMonitor.pendingConfirmation = nil
-            Task { await diskMonitor.cleanDocker() }
+        let permanently = switch action {
+        case .remove(let permanently): permanently
+        // A prune can't be undone.
+        case .clean: true
         }
+        withAnimation(animation) { diskMonitor.pendingConfirmation = .category(id, permanently: permanently) }
     }
 
     private func confirm(permanently: Bool) {
+        diskMonitor.pendingConfirmation = nil
+        if isDocker {
+            Task { await diskMonitor.cleanDocker() }
+            return
+        }
         let items = diskMonitor.selection(in: id)
         Task { await diskMonitor.remove(items, from: id, permanently: permanently) }
     }
@@ -201,12 +207,18 @@ struct DiskCategoryRow: View {
             }
             .keyboardShortcut(.cancelAction)
 
-            Button(id.removalTitle(permanently: permanently)) { confirm(permanently: permanently) }
+            Button(confirmTitle(permanently: permanently)) { confirm(permanently: permanently) }
                 .keyboardShortcut(.defaultAction)
                 .tint(permanently ? .red : nil)
                 .buttonStyle(.borderedProminent)
         }
         .controlSize(.small)
+    }
+
+    /// "Clean" / "Open and clean" for Docker, the category's removal ("Delete", "Move to Trash", "Empty") otherwise.
+    private func confirmTitle(permanently: Bool) -> LocalizedStringKey {
+        if let action, case .clean = action { return title(for: action) }
+        return id.removalTitle(permanently: permanently)
     }
 
     private var accessibilityValue: String {

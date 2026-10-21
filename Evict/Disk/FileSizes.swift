@@ -15,10 +15,7 @@ enum FileSizes {
         }
         // The enumerator skips the root itself, and doesn't follow symlinks to folders.
         var total = size(url)
-        for case let child as URL in enumerator {
-            if Task.isCancelled { break }
-            total += size(child)
-        }
+        drainingEach(enumerator) { total += size($0) }
         return total
     }
 
@@ -29,12 +26,30 @@ enum FileSizes {
         guard let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: keys) else {
             return newest
         }
-        for case let child as URL in enumerator {
-            if Task.isCancelled { break }
-            guard let date = try? child.resourceValues(forKeys: Set(keys)).contentModificationDate else { continue }
+        drainingEach(enumerator) { child in
+            guard let date = try? child.resourceValues(forKeys: Set(keys)).contentModificationDate else { return }
             if newest.map({ date > $0 }) ?? true { newest = date }
         }
         return newest
+    }
+
+    /// Visits every URL until the enumerator runs out or the task is cancelled, draining an
+    /// autorelease pool every `batch` items. The enumerator's URLs and resource values are
+    /// autoreleased, and a synchronous walk in a task never drains on its own: without this
+    /// a scan of the home folder holds every URL it saw until it ends (hundreds of MB).
+    static func drainingEach(_ enumerator: FileManager.DirectoryEnumerator, batch: Int = 500, _ body: (URL) -> Void) {
+        var exhausted = false
+        while !exhausted, !Task.isCancelled {
+            autoreleasepool {
+                for _ in 0..<batch {
+                    guard let url = enumerator.nextObject() as? URL else {
+                        exhausted = true
+                        return
+                    }
+                    body(url)
+                }
+            }
+        }
     }
 
     /// The later of Spotlight's last-used date and the modification date.

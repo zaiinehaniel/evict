@@ -25,16 +25,12 @@ enum UserFilesScanner {
 
         let keys = Set(HomeExclusions.resourceKeys)
         let deniedPaths = Set(denied.map { $0.url.standardizedFileURL.path })
-        var visited = 0
-        for case let url as URL in enumerator {
-            visited += 1
-            if visited % 500 == 0, Task.isCancelled { return [:] }
-            let values = try? url.resourceValues(forKeys: keys)
-            guard let values else { continue }
+        FileSizes.drainingEach(enumerator) { url in
+            guard let values = try? url.resourceValues(forKeys: keys) else { return }
             let isDirectory = values.isDirectory == true
             if HomeExclusions.shouldSkip(url, values, deniedPaths: deniedPaths) {
                 if isDirectory { enumerator.skipDescendants() }
-                continue
+                return
             }
             let parent = url.deletingLastPathComponent().path
 
@@ -45,7 +41,7 @@ enum UserFilesScanner {
                 } else if parent == downloads, isOlderThan(staleDownload, FileSizes.newestModification(in: url)) {
                     found[.oldDownloads, default: []].append(item(url, isDirectory: true))
                 }
-                continue
+                return
             }
 
             let topLevelOfDownloadsOrDesktop = parent == downloads || parent == desktop

@@ -38,6 +38,8 @@ final class DiskMonitor {
     @ObservationIgnored private var scanTask: Task<Void, Never>?
     /// Items removed since the running scan started, so its late results can't bring them back.
     @ObservationIgnored private var removedDuringScan: Set<String> = []
+    /// The protected-folder checks under way, shared by every scan that needs them.
+    @ObservationIgnored private var accessTask: Task<[ProtectedFolder], Never>?
     private static let removalConcurrency = 4
 
     init() {
@@ -194,11 +196,7 @@ final class DiskMonitor {
             if enabled {
                 group.addTask {
                     // Each check may sit behind a macOS prompt, so it must not hold up App junk.
-                    var denied: [ProtectedFolder] = []
-                    for folder in ProtectedFolder.allCases {
-                        if Task.isCancelled { return }
-                        if !folder.hasAccess() { denied.append(folder) }
-                    }
+                    let denied = await self.checkAccess()
                     await self.setDenied(denied)
                     let found = await UserFilesScanner.scan(denied: Set(denied))
                     guard !Task.isCancelled else { return }
@@ -326,6 +324,20 @@ final class DiskMonitor {
         Preferences.diskScanCache = DiskCategoryID.allCases.compactMap { categories[$0] }
         volume = DiskVolume.current()
         working.subtract(batches.keys)
+    }
+
+    /// The protected folders macOS refuses access to, checked one after the other so each prompt
+    /// follows the last. Runs apart from the scan: answering a prompt closes the popover, which
+    /// cancels the scan, and the remaining folders must still be asked for.
+    private func checkAccess() async -> [ProtectedFolder] {
+        if let accessTask { return await accessTask.value }
+        let task = Task.detached(priority: .userInitiated) {
+            ProtectedFolder.allCases.filter { !$0.hasAccess() }
+        }
+        accessTask = task
+        let denied = await task.value
+        accessTask = nil
+        return denied
     }
 
     private func setScanningUserFiles(_ scanning: Bool) {

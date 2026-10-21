@@ -323,11 +323,13 @@ private struct DiskItemRow: View {
                 .foregroundStyle(isChecked ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
 
             if let caption {
+                // Gives way first, so a long path never pushes the size out of the row.
                 Text("· \(caption)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                    .fixedSize()
+                    .truncationMode(.middle)
+                    .layoutPriority(-1)
             }
 
             Spacer(minLength: 8)

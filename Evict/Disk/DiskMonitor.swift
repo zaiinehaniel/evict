@@ -108,7 +108,11 @@ final class DiskMonitor {
 
     /// The items a category's one-click action would remove: everything but kept items and running apps' caches.
     func selection(in id: DiskCategoryID) -> [DiskItem] {
-        (categories[id]?.items ?? []).filter { !$0.isOpen && !kept.contains($0.id) }
+        let items = (categories[id]?.items ?? []).filter { !$0.isOpen && !kept.contains($0.id) }
+        guard id == .appCaches else { return items }
+        // `isOpen` is from the last scan: an app launched since then has its cache left alone too.
+        let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
+        return items.filter { !running.contains(URL(filePath: $0.id).lastPathComponent) }
     }
 
     func setKept(_ kept: Bool, _ item: DiskItem) {

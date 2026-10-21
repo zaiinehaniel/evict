@@ -325,6 +325,16 @@
         }
       }
     },
+    "Checking your files…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificando seus arquivos…"
+          }
+        }
+      }
+    },
     "Choose App…": {
       "localizations": {
         "pt-BR": {

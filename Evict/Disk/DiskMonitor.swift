@@ -19,6 +19,8 @@ final class DiskMonitor {
     /// Only the categories with something in them.
     private(set) var categories: [DiskCategoryID: DiskCategory] = [:]
     private(set) var isScanning = false
+    /// Whether the walk of the home folder for Your files is under way.
+    private(set) var isScanningUserFiles = false
     /// Whether the user opted in to scanning Downloads, Desktop and Documents.
     private(set) var userFilesEnabled = Preferences.diskUserFilesEnabled
     /// The protected folders macOS refused access to on the last scan.
@@ -88,6 +90,7 @@ final class DiskMonitor {
         scanTask?.cancel()
         scanTask = nil
         isScanning = false
+        isScanningUserFiles = false
     }
 
     func category(_ id: DiskCategoryID) -> DiskCategory? {
@@ -174,6 +177,7 @@ final class DiskMonitor {
         let ids = DiskCategoryID.allCases.filter { $0.group == .appJunk && $0 != .docker }
         let enabled = userFilesEnabled
         if !enabled { clearUserFiles() }
+        isScanningUserFiles = enabled
         var scanDocker = true
         if case .working = docker { scanDocker = false }
         await withTaskGroup(of: Void.self) { group in
@@ -201,6 +205,7 @@ final class DiskMonitor {
                     for id in DiskCategoryID.allCases where id.group == .yourFiles && id != .trash {
                         await self.store(found[id] ?? [], in: id)
                     }
+                    await self.setScanningUserFiles(false)
                 }
                 group.addTask {
                     let trash = await UserFilesScanner.scanTrash()
@@ -321,6 +326,11 @@ final class DiskMonitor {
         Preferences.diskScanCache = DiskCategoryID.allCases.compactMap { categories[$0] }
         volume = DiskVolume.current()
         working.subtract(batches.keys)
+    }
+
+    private func setScanningUserFiles(_ scanning: Bool) {
+        guard !Task.isCancelled else { return }
+        isScanningUserFiles = scanning
     }
 
     private func setDenied(_ folders: [ProtectedFolder]) {

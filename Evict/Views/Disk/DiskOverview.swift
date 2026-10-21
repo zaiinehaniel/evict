@@ -36,6 +36,11 @@ struct DiskOverview: View {
         }
     }
 
+    /// The first walk for Your files is under way and nothing has turned up yet.
+    private var isCheckingYourFiles: Bool {
+        diskMonitor.userFilesEnabled && diskMonitor.isScanningUserFiles
+    }
+
     /// The rows that ask for something (the opt-in, or access to a denied folder).
     private var promptCount: Int {
         diskMonitor.userFilesEnabled ? diskMonitor.deniedFolders.count : 1
@@ -44,7 +49,7 @@ struct DiskOverview: View {
     var body: some View {
         let appJunk = appJunk
         let yourFiles = yourFiles
-        let showsYourFiles = !yourFiles.isEmpty || promptCount > 0
+        let showsYourFiles = !yourFiles.isEmpty || promptCount > 0 || isCheckingYourFiles
 
         if !appJunk.isEmpty || showsYourFiles {
             list(appJunk: appJunk, yourFiles: yourFiles, showsYourFiles: showsYourFiles)
@@ -62,7 +67,8 @@ struct DiskOverview: View {
 
     private func list(appJunk: [DiskCategoryID], yourFiles: [DiskCategoryID], showsYourFiles: Bool) -> some View {
         let labels = (appJunk.isEmpty ? 0 : 1) + (showsYourFiles ? 1 : 0)
-        let rows = appJunk.count + yourFiles.count
+        let checking = showsYourFiles && isCheckingYourFiles && yourFiles.isEmpty
+        let rows = appJunk.count + yourFiles.count + (checking ? 1 : 0)
         let prompts = showsYourFiles ? promptCount : 0
         let height = CGFloat(labels) * Self.labelHeight + CGFloat(rows) * DiskCategoryRow.height
             + CGFloat(prompts) * DiskPromptRow.height + 8
@@ -91,6 +97,10 @@ struct DiskOverview: View {
                                           caption: nil) {
                                 NSWorkspace.shared.open(Self.filesAccessURL)
                             }
+                        }
+                        if checking {
+                            DiskCheckingRow()
+                                .transition(.opacity)
                         }
                         ForEach(yourFiles) { id in
                             DiskCategoryRow(id: id, diskMonitor: diskMonitor) { open(id) }
@@ -130,6 +140,24 @@ struct OptionDeleteHint: View {
             .foregroundStyle(.tertiary)
             .lineLimit(1)
             .accessibilityLabel("Hold Option to delete permanently")
+    }
+}
+
+/// "Checking your files…", while the first walk of the home folder has nothing to show yet.
+private struct DiskCheckingRow: View {
+    var body: some View {
+        HStack(spacing: 10) {
+            ProgressView()
+                .controlSize(.small)
+                .frame(width: 24, height: 24)
+            Text("Checking your files…")
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .frame(height: DiskCategoryRow.height)
+        .accessibilityElement(children: .combine)
     }
 }
 

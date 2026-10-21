@@ -1,7 +1,7 @@
 import Darwin
 import Foundation
 
-/// The "Never scanned" rules: nothing from Drive, iCloud, the OS or another volume.
+/// The "Never scanned" rules: nothing from Drive, iCloud, the OS, Apple's media libraries or another volume.
 enum HomeExclusions {
     private static let cloudPrefixes = ["Dropbox", "Google Drive", "OneDrive", "Box", "iCloud Drive"]
 
@@ -13,6 +13,11 @@ enum HomeExclusions {
     private static let homeURL = FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL
     private static let homePath = homeURL.path
     private static let libraryPath = homeURL.appending(path: "Library").path
+    /// Apple's media libraries. Reading them makes macOS ask for access to Apple Music or TV,
+    /// and nothing in them should be removed by hand.
+    private static let mediaLibraryPaths: Set<String> = Set(["Music/Music", "Music/iTunes", "Movies/TV"].map {
+        homeURL.appending(path: $0).path
+    })
 
     /// Whether the walker leaves `url` (and everything under it) alone. `denied` folders are skipped too.
     static func shouldSkip(_ url: URL, _ values: URLResourceValues, denied: Set<ProtectedFolder>) -> Bool {
@@ -22,7 +27,8 @@ enum HomeExclusions {
     /// Same, with the denied folders' standardized paths worked out once by the caller.
     static func shouldSkip(_ url: URL, _ values: URLResourceValues, deniedPaths: Set<String>) -> Bool {
         let path = url.standardizedFileURL.path
-        if isCloudOrOutsideHome(path: path, isUbiquitous: values.isUbiquitousItem) || path == libraryPath { return true }
+        if isCloudOrOutsideHome(path: path, isUbiquitous: values.isUbiquitousItem) || path == libraryPath
+            || mediaLibraryPaths.contains(path) { return true }
         if values.isHidden == true || values.isPackage == true || values.isSymbolicLink == true { return true }
         // A disk image, network share or FUSE mount under ~ (OrbStack, sshfs, rclone…). Checked on folders
         // only: a file can't be on another volume without its folder being on it too.
